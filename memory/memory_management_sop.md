@@ -88,3 +88,59 @@ L4: ../memory/L4_raw_sessions/ (历史会话层 - scheduler反射自动收集，
             │
             └─ NO → 判定为『通用常识』或『冗余信息』: 严禁存储，直接丢弃
 ```
+
+## 高级记忆引擎
+
+### memory-lancedb-pro (动态记忆引擎)
+**职责**：使用向量数据库存储和检索记忆，支持语义搜索和动态记忆管理。
+**特征**：
+- 支持三种记忆类型：short_term（短期记忆）、long_term（长期记忆）、fact（事实记忆）
+- 使用 OpenAI Embeddings 进行语义嵌入，支持相似度搜索
+- 自动管理短期记忆的过期清理
+- 提供完整的 CRUD 操作 API
+
+**使用场景**：
+- 存储和检索对话历史
+- 保存用户偏好和习惯
+- 记录重要的环境信息
+- 快速查找相关记忆
+
+**工具函数**：
+- `add_memory`：添加记忆
+- `search_memory`：搜索记忆
+- `get_recent_memories`：获取最近记忆
+- `update_memory`：更新记忆
+- `delete_memory`：删除记忆
+- `clear_short_term_memory`：清除短期记忆
+- `get_memory_stats`：获取记忆统计信息
+
+### openclaw-wiki-lancedb (持久知识库)
+**职责**：使用向量数据库存储结构化的知识库条目，支持分类、标签和语义搜索。
+**特征**：
+- 支持知识库条目的分类和标签管理
+- 使用 OpenAI Embeddings 进行语义嵌入，支持相似度搜索
+- 提供 JSON 导入/导出功能
+- 支持按分类和标签过滤搜索
+
+**使用场景**：
+- 存储结构化的知识和文档
+- 建立领域特定的知识库
+- 快速检索专业信息
+- 管理和维护持久化的知识体系
+
+**工具函数**：
+- `add_wiki_entry`：添加知识库条目
+- `search_wiki`：搜索知识库
+- `get_wiki_entry`：获取知识库条目
+- `update_wiki_entry`：更新知识库条目
+- `delete_wiki_entry`：删除知识库条目
+- `get_wiki_categories`：获取知识库分类
+- `get_wiki_tags`：获取知识库标签
+- `import_wiki_from_json`：从 JSON 导入知识库
+- `export_wiki_to_json`：导出知识库到 JSON
+- `get_wiki_stats`：获取知识库统计信息
+
+### 与传统记忆系统的关系
+- **传统记忆系统**（L1/L2/L3）：适用于结构化的环境信息和操作指南，以文本文件形式存储
+- **高级记忆引擎**：适用于非结构化的、需要语义搜索的记忆和知识，以向量数据库形式存储
+- **协同工作**：两种系统可以同时使用，传统系统提供结构化的基础信息，高级引擎提供智能的语义检索能力

@@ -505,6 +505,240 @@ class GenericAgentHandler(BaseHandler):
         if os.path.exists(path): result = '自动读取L0内容：\n' + file_read(path, show_linenos=False)
         else: result = "Memory Management SOP not found. Do not update memory."
         return StepOutcome(result, next_prompt=prompt)
+    
+    # memory-lancedb-pro 相关工具
+    def do_add_memory(self, args, response):
+        '''添加记忆到动态记忆引擎'''        
+        content = args.get("content")
+        memory_type = args.get("memory_type", "short_term")
+        metadata = args.get("metadata", {})
+        
+        try:
+            from memory.memory_lancedb_pro import add_memory
+            memory_id = add_memory(content, memory_type, metadata)
+            yield f"[Info] Memory added with ID: {memory_id}\n"
+            return StepOutcome({"status": "success", "memory_id": memory_id}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to add memory: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_search_memory(self, args, response):
+        '''搜索动态记忆引擎中的记忆'''        
+        query = args.get("query")
+        top_k = args.get("top_k", 5)
+        memory_type = args.get("memory_type")
+        
+        try:
+            from memory.memory_lancedb_pro import search_memory
+            results = search_memory(query, top_k, memory_type)
+            yield f"[Info] Found {len(results)} memories\n"
+            return StepOutcome({"status": "success", "results": results}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to search memory: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_get_recent_memories(self, args, response):
+        '''获取最近的记忆'''        
+        hours = args.get("hours", 24)
+        limit = args.get("limit", 10)
+        
+        try:
+            from memory.memory_lancedb_pro import get_recent_memories
+            results = get_recent_memories(hours, limit)
+            yield f"[Info] Found {len(results)} recent memories\n"
+            return StepOutcome({"status": "success", "results": results}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to get recent memories: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_update_memory(self, args, response):
+        '''更新记忆'''        
+        memory_id = args.get("memory_id")
+        content = args.get("content")
+        metadata = args.get("metadata")
+        
+        try:
+            from memory.memory_lancedb_pro import update_memory
+            success = update_memory(memory_id, content, metadata)
+            yield f"[Info] Memory updated: {success}\n"
+            return StepOutcome({"status": "success", "updated": success}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to update memory: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_delete_memory(self, args, response):
+        '''删除记忆'''        
+        memory_id = args.get("memory_id")
+        
+        try:
+            from memory.memory_lancedb_pro import delete_memory
+            success = delete_memory(memory_id)
+            yield f"[Info] Memory deleted: {success}\n"
+            return StepOutcome({"status": "success", "deleted": success}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to delete memory: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_clear_short_term_memory(self, args, response):
+        '''清除短期记忆'''        
+        older_than_hours = args.get("older_than_hours", 24)
+        
+        try:
+            from memory.memory_lancedb_pro import clear_short_term_memory
+            success = clear_short_term_memory(older_than_hours)
+            yield f"[Info] Short term memory cleared: {success}\n"
+            return StepOutcome({"status": "success", "cleared": success}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to clear short term memory: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_get_memory_stats(self, args, response):
+        '''获取记忆统计信息'''        
+        try:
+            from memory.memory_lancedb_pro import get_memory_stats
+            stats = get_memory_stats()
+            yield f"[Info] Memory stats retrieved\n"
+            return StepOutcome({"status": "success", "stats": stats}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to get memory stats: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    # openclaw-wiki-lancedb 相关工具
+    def do_add_wiki_entry(self, args, response):
+        '''添加知识库条目'''        
+        title = args.get("title")
+        content = args.get("content")
+        tags = args.get("tags", [])
+        category = args.get("category", "general")
+        metadata = args.get("metadata", {})
+        
+        try:
+            from memory.openclaw_wiki_lancedb import add_wiki_entry
+            entry_id = add_wiki_entry(title, content, tags, category, metadata)
+            yield f"[Info] Wiki entry added with ID: {entry_id}\n"
+            return StepOutcome({"status": "success", "entry_id": entry_id}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to add wiki entry: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_search_wiki(self, args, response):
+        '''搜索知识库'''        
+        query = args.get("query")
+        top_k = args.get("top_k", 5)
+        category = args.get("category")
+        tags = args.get("tags")
+        
+        try:
+            from memory.openclaw_wiki_lancedb import search_wiki
+            results = search_wiki(query, top_k, category, tags)
+            yield f"[Info] Found {len(results)} wiki entries\n"
+            return StepOutcome({"status": "success", "results": results}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to search wiki: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_get_wiki_entry(self, args, response):
+        '''获取知识库条目'''        
+        entry_id = args.get("entry_id")
+        
+        try:
+            from memory.openclaw_wiki_lancedb import get_wiki_entry
+            entry = get_wiki_entry(entry_id)
+            yield f"[Info] Wiki entry retrieved\n"
+            return StepOutcome({"status": "success", "entry": entry}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to get wiki entry: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_update_wiki_entry(self, args, response):
+        '''更新知识库条目'''        
+        entry_id = args.get("entry_id")
+        title = args.get("title")
+        content = args.get("content")
+        tags = args.get("tags")
+        category = args.get("category")
+        metadata = args.get("metadata")
+        
+        try:
+            from memory.openclaw_wiki_lancedb import update_wiki_entry
+            success = update_wiki_entry(entry_id, title, content, tags, category, metadata)
+            yield f"[Info] Wiki entry updated: {success}\n"
+            return StepOutcome({"status": "success", "updated": success}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to update wiki entry: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_delete_wiki_entry(self, args, response):
+        '''删除知识库条目'''        
+        entry_id = args.get("entry_id")
+        
+        try:
+            from memory.openclaw_wiki_lancedb import delete_wiki_entry
+            success = delete_wiki_entry(entry_id)
+            yield f"[Info] Wiki entry deleted: {success}\n"
+            return StepOutcome({"status": "success", "deleted": success}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to delete wiki entry: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_get_wiki_categories(self, args, response):
+        '''获取知识库分类'''        
+        try:
+            from memory.openclaw_wiki_lancedb import get_wiki_categories
+            categories = get_wiki_categories()
+            yield f"[Info] Found {len(categories)} wiki categories\n"
+            return StepOutcome({"status": "success", "categories": categories}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to get wiki categories: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_get_wiki_tags(self, args, response):
+        '''获取知识库标签'''        
+        try:
+            from memory.openclaw_wiki_lancedb import get_wiki_tags
+            tags = get_wiki_tags()
+            yield f"[Info] Found {len(tags)} wiki tags\n"
+            return StepOutcome({"status": "success", "tags": tags}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to get wiki tags: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_import_wiki_from_json(self, args, response):
+        '''从 JSON 导入知识库'''        
+        json_file = args.get("json_file")
+        
+        try:
+            from memory.openclaw_wiki_lancedb import import_wiki_from_json
+            count = import_wiki_from_json(json_file)
+            yield f"[Info] Imported {count} wiki entries from JSON\n"
+            return StepOutcome({"status": "success", "imported_count": count}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to import wiki from JSON: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_export_wiki_to_json(self, args, response):
+        '''导出知识库到 JSON'''        
+        json_file = args.get("json_file")
+        
+        try:
+            from memory.openclaw_wiki_lancedb import export_wiki_to_json
+            count = export_wiki_to_json(json_file)
+            yield f"[Info] Exported {count} wiki entries to JSON\n"
+            return StepOutcome({"status": "success", "exported_count": count}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to export wiki to JSON: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
+    
+    def do_get_wiki_stats(self, args, response):
+        '''获取知识库统计信息'''        
+        try:
+            from memory.openclaw_wiki_lancedb import get_wiki_stats
+            stats = get_wiki_stats()
+            yield f"[Info] Wiki stats retrieved\n"
+            return StepOutcome({"status": "success", "stats": stats}, next_prompt="\n")
+        except Exception as e:
+            yield f"[Error] Failed to get wiki stats: {str(e)}\n"
+            return StepOutcome({"status": "error", "msg": str(e)}, next_prompt="\n")
 
     def _get_anchor_prompt(self, skip=False):
         if skip: return "\n"
@@ -558,5 +792,25 @@ def get_global_memory():
         prompt += f"\n[Memory] (../memory)\n"
         prompt += structure + '\n../memory/global_mem_insight.txt:\n'
         prompt += insight + "\n"
+        
+        # 集成 memory-lancedb-pro 和 openclaw-wiki-lancedb
+        try:
+            from memory.memory_lancedb_pro import get_memory_stats
+            from memory.openclaw_wiki_lancedb import get_wiki_stats
+            
+            memory_stats = get_memory_stats()
+            wiki_stats = get_wiki_stats()
+            
+            prompt += "\n[Advanced Memory Engines]\n"
+            prompt += f"- memory-lancedb-pro: {memory_stats['total']} memories (short: {memory_stats['short_term']}, long: {memory_stats['long_term']}, fact: {memory_stats['fact']})\n"
+            prompt += f"- openclaw-wiki-lancedb: {wiki_stats['total']} wiki entries across {wiki_stats['categories']} categories\n"
+        except ImportError:
+            prompt += "\n[Advanced Memory Engines]\n"
+            prompt += "- memory-lancedb-pro: Not initialized\n"
+            prompt += "- openclaw-wiki-lancedb: Not initialized\n"
+        except Exception as e:
+            prompt += "\n[Advanced Memory Engines]\n"
+            prompt += f"- memory-lancedb-pro: Error - {str(e)}\n"
+            prompt += "- openclaw-wiki-lancedb: Error\n"
     except FileNotFoundError: pass
     return prompt
