@@ -31,6 +31,18 @@
       <button class="nav-item" data-view="chat">
         <span class="nav-ico">◇</span>对话
       </button>
+      <div class="nav-divider"></div>
+      <div class="nav-section-label">多 Agent</div>
+      <button class="nav-item" data-view="conductor">
+        <span class="nav-ico">🎼</span>指挥家
+      </button>
+      <button class="nav-item" data-view="hive">
+        <span class="nav-ico">🐝</span>蜂巢
+      </button>
+      <button class="nav-item" data-view="morphling">
+        <span class="nav-ico">🧬</span>变形者
+      </button>
+      <div class="nav-divider"></div>
       <button class="nav-item" data-view="memory">
         <span class="nav-ico">◇</span>记忆
       </button>
@@ -453,6 +465,519 @@ FEISHU_WEBHOOK_SECRET=ok</pre>
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- View: Conductor — Multi-agent orchestration -->
+    <section class="view view-conductor" data-view="conductor">
+      <header class="view-header">
+        <div class="greeting">
+          <h1>🎼 指挥家</h1>
+          <p class="subtle">多 Agent 编排 · 创建子 Agent 协调复杂任务</p>
+        </div>
+        <div class="header-meta">
+          <div class="status-pill ok"><span class="dot pulse"></span>3 个子 Agent 活跃</div>
+        </div>
+      </header>
+
+      <!-- Main task input -->
+      <section class="conductor-main">
+        <div class="conductor-objective-card">
+          <div class="conductor-card-header">
+            <span class="conductor-badge primary">主任务</span>
+            <span class="conductor-agent-name">Conductor (Claude-Sonnet-4)</span>
+          </div>
+          <div class="conductor-objective-text">
+            帮我分析 A 股科创板所有股票的财务数据，筛选出 ROE > 15%、营收增长 > 20% 的优质标的，并生成推荐报告推送到飞书
+          </div>
+          <div class="conductor-objective-meta">
+            <span class="meta-sep">·</span>
+            <span class="meta">已分解为 4 个子任务</span>
+            <span class="meta-sep">·</span>
+            <span class="meta">预计 12 分钟</span>
+            <span class="meta-sep">·</span>
+            <span class="meta">预算 ¥0.08</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Subagent orchestration -->
+      <section class="subagent-section">
+        <h2 class="section-label">子 Agent 执行中</h2>
+        <div class="subagent-grid">
+          <!-- Subagent 1 -->
+          <div class="subagent-card running">
+            <div class="subagent-header">
+              <div class="subagent-avatar">🔍</div>
+              <div class="subagent-info">
+                <div class="subagent-name">Researcher-1</div>
+                <div class="subagent-role">数据采集</div>
+              </div>
+              <span class="badge running"><span class="dot pulse"></span>执行中</span>
+            </div>
+            <div class="subagent-task">
+              采集科创板股票基础数据（代码、名称、市值）
+            </div>
+            <div class="subagent-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width: 68%"></div></div>
+              <span class="progress-text">68% · 142 只股票</span>
+            </div>
+            <div class="subagent-tools">
+              <div class="subagent-tool-card success">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">python fetch_stocks.py --market gem</span>
+                <span class="tool-duration">3.2s</span>
+              </div>
+              <div class="subagent-tool-card running">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">分析财报数据...</span>
+                <span class="tool-duration"><span class="pulse-dot"></span>执行中</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subagent 2 -->
+          <div class="subagent-card success">
+            <div class="subagent-header">
+              <div class="subagent-avatar">📊</div>
+              <div class="subagent-info">
+                <div class="subagent-name">Analyzer-1</div>
+                <div class="subagent-role">财务分析</div>
+              </div>
+              <span class="badge done"><span class="dot"></span>已完成</span>
+            </div>
+            <div class="subagent-task">
+              计算 ROE、营收增长率等核心指标
+            </div>
+            <div class="subagent-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+              <span class="progress-text">100% · 89 只通过初筛</span>
+            </div>
+            <div class="subagent-tools">
+              <div class="subagent-tool-card success">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">计算 ROE 和营收增长率</span>
+                <span class="tool-duration">8.4s</span>
+              </div>
+              <div class="subagent-tool-card success">
+                <span class="tool-ico">📝</span>
+                <span class="tool-name">file_write</span>
+                <span class="tool-args-pre">analysis_result.json</span>
+                <span class="tool-duration">0.2s</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subagent 3 -->
+          <div class="subagent-card waiting">
+            <div class="subagent-header">
+              <div class="subagent-avatar">📨</div>
+              <div class="subagent-info">
+                <div class="subagent-name">Reporter-1</div>
+                <div class="subagent-role">报告生成</div>
+              </div>
+              <span class="badge"><span class="dot"></span>等待中</span>
+            </div>
+            <div class="subagent-task">
+              汇总结果并生成 Markdown 报告
+            </div>
+            <div class="subagent-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+              <span class="progress-text">等待数据输入...</span>
+            </div>
+          </div>
+
+          <!-- Subagent 4 -->
+          <div class="subagent-card waiting">
+            <div class="subagent-header">
+              <div class="subagent-avatar">🔔</div>
+              <div class="subagent-info">
+                <div class="subagent-name">Notifier-1</div>
+                <div class="subagent-role">通知推送</div>
+              </div>
+              <span class="badge"><span class="dot"></span>等待中</span>
+            </div>
+            <div class="subagent-task">
+              推送报告到飞书群
+            </div>
+            <div class="subagent-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+              <span class="progress-text">等待报告生成...</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Orchestration log -->
+      <section class="orchestration-log">
+        <h2 class="section-label">编排日志</h2>
+        <div class="log-timeline">
+          <div class="log-entry">
+            <span class="log-time">14:32:01</span>
+            <span class="log-badge conductor">🎼</span>
+            <span class="log-text">Conductor 分解任务为 4 个子任务</span>
+          </div>
+          <div class="log-entry">
+            <span class="log-time">14:32:02</span>
+            <span class="log-badge researcher">🔍</span>
+            <span class="log-text">Researcher-1 启动，开始采集股票数据</span>
+          </div>
+          <div class="log-entry">
+            <span class="log-time">14:32:05</span>
+            <span class="log-badge analyzer">📊</span>
+            <span class="log-text">Analyzer-1 启动，等待数据就绪</span>
+          </div>
+          <div class="log-entry">
+            <span class="log-time">14:33:12</span>
+            <span class="log-badge analyzer">📊</span>
+            <span class="log-text">Analyzer-1 已完成，89 只股票通过筛选</span>
+          </div>
+          <div class="log-entry current">
+            <span class="log-time">14:33:15</span>
+            <span class="log-badge researcher">🔍</span>
+            <span class="log-text">Researcher-1 正在执行深度分析...</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Composer for conductor -->
+      <div class="composer-wrap">
+        <div class="composer conductor-composer">
+          <textarea rows="1" placeholder="为当前任务添加新的子 Agent，或修改执行策略..."></textarea>
+          <div class="composer-tools">
+            <button title="添加子 Agent">🤖</button>
+            <button class="send">⏎</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- View: Hive — Multi-agent collaboration board -->
+    <section class="view view-hive" data-view="hive">
+      <header class="view-header">
+        <div class="greeting">
+          <h1>🐝 蜂巢</h1>
+          <p class="subtle">目标驱动型多 Agent 协作 · 通过公告板消息协作</p>
+        </div>
+        <div class="header-meta">
+          <div class="hive-status-row">
+            <div class="hive-stat">
+              <span class="stat-num">4</span>
+              <span class="stat-label">在线 Agent</span>
+            </div>
+            <div class="hive-stat">
+              <span class="stat-num">12</span>
+              <span class="stat-label">待处理任务</span>
+            </div>
+            <div class="hive-stat">
+              <span class="stat-num">¥0.45</span>
+              <span class="stat-label">已消耗</span>
+            </div>
+          </div>
+          <button class="primary-btn">🚀 启动蜂巢</button>
+        </div>
+      </header>
+
+      <!-- Objective setting -->
+      <section class="hive-objective">
+        <div class="objective-card">
+          <div class="objective-header">
+            <span class="hive-badge objective">🎯 目标</span>
+            <span class="objective-status running">● 运行中</span>
+          </div>
+          <div class="objective-text">
+            完成本月电商数据大盘分析报告，包含：流量分析、转化漏斗、竞品对比、优化建议
+          </div>
+          <div class="objective-meta">
+            <span>⏱ 预计 30 分钟</span>
+            <span>·</span>
+            <span>💰 预算 ¥1.00</span>
+            <span>·</span>
+            <span>👥 4 个 Worker</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- BBS Message Board -->
+      <section class="bbs-board">
+        <h2 class="section-label">公告板</h2>
+        <div class="bbs-container">
+          <!-- BBS Post 1 -->
+          <div class="bbs-post">
+            <div class="bbs-post-header">
+              <span class="bbs-avatar">🛒</span>
+              <span class="bbs-author">DataCollector</span>
+              <span class="bbs-badge collection">数据采集</span>
+              <span class="bbs-time">刚刚</span>
+            </div>
+            <div class="bbs-post-content">
+              已完成淘宝、京东、拼多多三家平台的本月销售数据抓取，共 2,847 条记录，已上传至共享存储 /hive/data/sales_2024_01/
+            </div>
+            <div class="bbs-post-footer">
+              <span class="bbs-action">📎 附件: sales_summary.csv (234KB)</span>
+              <span class="bbs-replies">💬 3 条回复</span>
+            </div>
+          </div>
+
+          <!-- BBS Post 2 -->
+          <div class="bbs-post">
+            <div class="bbs-post-header">
+              <span class="bbs-avatar">📈</span>
+              <span class="bbs-author">TrafficAnalyzer</span>
+              <span class="bbs-badge analysis">流量分析</span>
+              <span class="bbs-time">3 分钟前</span>
+            </div>
+            <div class="bbs-post-content">
+              完成流量分析初稿。发现本周 UV 环比上涨 12%，但转化率下降 0.8pp。主要原因是移动端加载速度变慢（平均 4.2s），已标记需要前端优化。
+              <div class="bbs-quote">
+                <span class="quote-author">@DataCollector:</span>
+                明白，我把移动端埋点数据单独导出了一份，方便你深入分析。
+              </div>
+            </div>
+            <div class="bbs-post-footer">
+              <span class="bbs-action">✓ 状态更新</span>
+              <span class="bbs-replies">💬 5 条回复</span>
+            </div>
+          </div>
+
+          <!-- BBS Post 3 -->
+          <div class="bbs-post urgent">
+            <div class="bbs-post-header">
+              <span class="bbs-avatar">⚠️</span>
+              <span class="bbs-author">DataCollector</span>
+              <span class="bbs-badge urgent">⚡ 紧急</span>
+              <span class="bbs-time">5 分钟前</span>
+            </div>
+            <div class="bbs-post-content">
+              ⚠️ 抖音数据接口返回异常，疑似平台风控。请 TrafficAnalyzer 和 CompetitorAnalyzer 暂停相关任务，等待修复。
+            </div>
+            <div class="bbs-post-footer">
+              <span class="bbs-action">@all 注意</span>
+              <span class="bbs-replies">💬 2 条回复</span>
+            </div>
+          </div>
+
+          <!-- BBS Post 4 -->
+          <div class="bbs-post">
+            <div class="bbs-post-header">
+              <span class="bbs-avatar">🔍</span>
+              <span class="bbs-author">CompetitorAnalyzer</span>
+              <span class="bbs-badge research">竞品研究</span>
+              <span class="bbs-time">12 分钟前</span>
+            </div>
+            <div class="bbs-post-content">
+              竞品分析完成。发现 A 竞品本周大幅降价 15%，可能是导致我们转化率下降的直接原因。详见附件对比报告。
+              <div class="bbs-quote">
+                <span class="quote-author">@Reporter:</span>
+                已收到，正在整合进最终报告。
+              </div>
+            </div>
+            <div class="bbs-post-footer">
+              <span class="bbs-action">📎 竞品对比报告.pdf</span>
+              <span class="bbs-replies">💬 4 条回复</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Worker status -->
+      <section class="worker-status">
+        <h2 class="section-label">Worker 状态</h2>
+        <div class="worker-grid">
+          <div class="worker-card active">
+            <div class="worker-avatar">🛒</div>
+            <div class="worker-info">
+              <div class="worker-name">DataCollector</div>
+              <div class="worker-task">数据采集</div>
+            </div>
+            <div class="worker-badge running"><span class="dot pulse"></span>运行中</div>
+          </div>
+          <div class="worker-card idle">
+            <div class="worker-avatar">📈</div>
+            <div class="worker-info">
+              <div class="worker-name">TrafficAnalyzer</div>
+              <div class="worker-task">流量分析</div>
+            </div>
+            <div class="worker-badge">空闲</div>
+          </div>
+          <div class="worker-card idle">
+            <div class="worker-avatar">🔍</div>
+            <div class="worker-info">
+              <div class="worker-name">CompetitorAnalyzer</div>
+              <div class="worker-task">竞品研究</div>
+            </div>
+            <div class="worker-badge">等待</div>
+          </div>
+          <div class="worker-card standby">
+            <div class="worker-avatar">📝</div>
+            <div class="worker-info">
+              <div class="worker-name">Reporter</div>
+              <div class="worker-task">报告生成</div>
+            </div>
+            <div class="worker-badge">待命</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- New post composer -->
+      <div class="composer-wrap">
+        <div class="composer bbs-composer">
+          <textarea rows="1" placeholder="在公告板发布消息，或 @ 指定 Worker..."></textarea>
+          <div class="composer-tools">
+            <button title="@Worker">@</button>
+            <button class="send">发布</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- View: Morphling — Capability absorption -->
+    <section class="view view-morphling" data-view="morphling">
+      <header class="view-header">
+        <div class="greeting">
+          <h1>🧬 变形者</h1>
+          <p class="subtle">能力吸收与替换 · 从项目中学习新技能</p>
+        </div>
+        <div class="header-meta">
+          <div class="morphling-stats">
+            <span class="stat-item">📦 2 个能力包待导入</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Current capabilities -->
+      <section class="current-capabilities">
+        <h2 class="section-label">当前已掌握的能力</h2>
+        <div class="capability-grid">
+          <div class="capability-card">
+            <div class="capability-icon">🌐</div>
+            <div class="capability-info">
+              <div class="capability-name">web_automation</div>
+              <div class="capability-desc">网页自动化操作 · 32 次调用</div>
+            </div>
+            <div class="capability-status active">活跃</div>
+          </div>
+          <div class="capability-card">
+            <div class="capability-icon">📊</div>
+            <div class="capability-info">
+              <div class="capability-name">data_analysis</div>
+              <div class="capability-desc">数据分析处理 · 18 次调用</div>
+            </div>
+            <div class="capability-status active">活跃</div>
+          </div>
+          <div class="capability-card">
+            <div class="capability-icon">📨</div>
+            <div class="capability-info">
+              <div class="capability-name">feishu_integration</div>
+              <div class="capability-desc">飞书集成 · 45 次调用</div>
+            </div>
+            <div class="capability-status active">活跃</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Morphling process visualization -->
+      <section class="morphling-process">
+        <h2 class="section-label">能力吸收中</h2>
+        <div class="morphling-active">
+          <div class="morph-card absorbing">
+            <div class="morph-header">
+              <div class="morph-source">
+                <span class="morph-badge source">📥 从项目导入</span>
+                <span class="source-path">./projects/ecommerce-analysis/</span>
+              </div>
+              <span class="morph-stage">Phase 2/3</span>
+            </div>
+            <div class="morph-title">竞品分析能力</div>
+            <div class="morph-phases">
+              <div class="phase completed">
+                <span class="phase-icon">✓</span>
+                <span class="phase-label">代码解析</span>
+              </div>
+              <div class="phase-line completed"></div>
+              <div class="phase active">
+                <span class="phase-icon pulse-dot"></span>
+                <span class="phase-label">SOP 生成</span>
+              </div>
+              <div class="phase-line"></div>
+              <div class="phase">
+                <span class="phase-icon">○</span>
+                <span class="phase-label">测试验证</span>
+              </div>
+            </div>
+            <div class="morph-progress-detail">
+              <div class="morph-step">✓ 识别到 12 个核心函数</div>
+              <div class="morph-step">✓ 提取 3 个 SOP 步骤</div>
+              <div class="morph-step current">→ 正在生成工具调用接口...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Available packages to absorb -->
+      <section class="available-packages">
+        <h2 class="section-label">可导入的能力包</h2>
+        <div class="package-grid">
+          <div class="package-card">
+            <div class="package-header">
+              <div class="package-icon">📱</div>
+              <div class="package-meta">
+                <div class="package-name">mobile_automation</div>
+                <div class="package-source">来源: adb_ui.py</div>
+              </div>
+            </div>
+            <div class="package-desc">
+              Android 设备控制能力，支持点击、滑动、截图等操作
+            </div>
+            <div class="package-stats">
+              <span>8 个工具函数</span>
+              <span>·</span>
+              <span>预估导入 5 分钟</span>
+            </div>
+            <button class="package-action">导入能力</button>
+          </div>
+
+          <div class="package-card">
+            <div class="package-header">
+              <div class="package-icon">🤖</div>
+              <div class="package-meta">
+                <div class="package-name">subagent_orchestration</div>
+                <div class="package-source">来源: hub.pyw</div>
+              </div>
+            </div>
+            <div class="package-desc">
+              多 Agent 编排能力，支持创建子 Agent 并协调执行
+            </div>
+            <div class="package-stats">
+              <span>15 个工具函数</span>
+              <span>·</span>
+              <span>预估导入 12 分钟</span>
+            </div>
+            <button class="package-action">导入能力</button>
+          </div>
+
+          <div class="package-card">
+            <div class="package-header">
+              <div class="package-icon">📄</div>
+              <div class="package-meta">
+                <div class="package-name">pdf_processing</div>
+                <div class="package-source">来源: ./skills/pdf_utils/</div>
+              </div>
+            </div>
+            <div class="package-desc">
+              PDF 文档处理能力，支持读取、合并、转换格式
+            </div>
+            <div class="package-stats">
+              <span>6 个工具函数</span>
+              <span>·</span>
+              <span>预估导入 3 分钟</span>
+            </div>
+            <button class="package-action">导入能力</button>
+          </div>
+        </div>
+      </section>
     </section>
 
     <!-- View: Memory (placeholder) -->
