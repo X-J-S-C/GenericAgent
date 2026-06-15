@@ -49,6 +49,10 @@
       <button class="nav-item" data-view="skills">
         <span class="nav-ico">◇</span>技能
       </button>
+      <div class="nav-spacer"></div>
+      <button class="nav-item nav-settings" data-view="settings">
+        <span class="nav-ico">⚙</span>设置
+      </button>
     </nav>
 
     <div class="sessions">
@@ -1006,6 +1010,594 @@ FEISHU_WEBHOOK_SECRET=ok</pre>
         <div class="skill-tile"><div class="skill-name">adb_ui</div><div class="skill-info">7 次</div></div>
         <div class="skill-tile"><div class="skill-name">mootdx_stock</div><div class="skill-info">4 次</div></div>
         <div class="skill-tile add"><div class="skill-name">+</div><div class="skill-info">让 Agent 学习新技能</div></div>
+      </div>
+    </section>
+    <!-- View: Settings -->
+    <section class="view view-settings" data-view="settings">
+      <header class="view-header">
+        <div class="greeting">
+          <h1>⚙️ 设置</h1>
+          <p class="subtle">配置 GenericAgent 的各项功能</p>
+        </div>
+      </header>
+
+      <!-- Settings tabs -->
+      <div class="settings-container">
+        <nav class="settings-nav">
+          <button class="settings-tab active" data-settings="llm">🤖 LLM 配置</button>
+          <button class="settings-tab" data-settings="bots">📱 Bot 接入</button>
+          <button class="settings-tab" data-settings="scheduler">⏰ 定时任务</button>
+          <button class="settings-tab" data-settings="autonomous">🎮 自主行动</button>
+          <button class="settings-tab" data-settings="memory">🧠 记忆管理</button>
+          <button class="settings-tab" data-settings="skills">📈 技能树</button>
+          <button class="settings-tab" data-settings="rewind">⏪ Rewind</button>
+          <button class="settings-tab" data-settings="tools">🔧 工具配置</button>
+          <button class="settings-tab" data-settings="about">ℹ️ 关于</button>
+        </nav>
+
+        <div class="settings-content">
+          <!-- LLM Settings -->
+          <div class="settings-panel active" data-panel="llm">
+            <h2 class="settings-section-title">LLM 模型配置</h2>
+            <div class="settings-card">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">当前模型</div>
+                  <div class="setting-desc">选择用于对话的 LLM</div>
+                </div>
+                <select class="setting-select">
+                  <option value="0" selected>Claude-Sonnet-4</option>
+                  <option value="1">Claude-Opus-4</option>
+                  <option value="2">Gemini-2.5-Pro</option>
+                  <option value="3">Kimi-2.5</option>
+                  <option value="4">MiniMax-Text-01</option>
+                </select>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">API Key</div>
+                  <div class="setting-desc">配置 LLM 服务商 API Key</div>
+                </div>
+                <input type="password" class="setting-input" value="sk-..." placeholder="输入 API Key">
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">API Endpoint</div>
+                  <div class="setting-desc">自定义 API 地址（可选）</div>
+                </div>
+                <input type="text" class="setting-input" placeholder="https://api.example.com/v1">
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">上下文上限</div>
+                  <div class="setting-desc">最大 token 数量</div>
+                </div>
+                <div class="setting-value">28K tokens</div>
+              </div>
+            </div>
+
+            <h2 class="settings-section-title">使用统计</h2>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value">142.5K</div>
+                <div class="stat-label">今日 Tokens</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">¥2.35</div>
+                <div class="stat-label">今日花费</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">18</div>
+                <div class="stat-label">会话数</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">89%</div>
+                <div class="stat-label">成功率</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bot Settings -->
+          <div class="settings-panel" data-panel="bots">
+            <h2 class="settings-section-title">Bot 接入配置</h2>
+            <div class="settings-card">
+              <div class="bot-row">
+                <div class="bot-info">
+                  <span class="bot-icon">📱</span>
+                  <div class="bot-details">
+                    <div class="bot-name">微信 Bot</div>
+                    <div class="bot-status connected">已连接</div>
+                  </div>
+                </div>
+                <button class="bot-btn">配置</button>
+              </div>
+              <div class="bot-row">
+                <div class="bot-info">
+                  <span class="bot-icon">📤</span>
+                  <div class="bot-details">
+                    <div class="bot-name">飞书 Bot</div>
+                    <div class="bot-status connected">已连接</div>
+                  </div>
+                </div>
+                <button class="bot-btn">配置</button>
+              </div>
+              <div class="bot-row">
+                <div class="bot-info">
+                  <span class="bot-icon">💬</span>
+                  <div class="bot-details">
+                    <div class="bot-name">QQ Bot</div>
+                    <div class="bot-status disconnected">未连接</div>
+                  </div>
+                </div>
+                <button class="bot-btn primary">连接</button>
+              </div>
+              <div class="bot-row">
+                <div class="bot-info">
+                  <span class="bot-icon">✈️</span>
+                  <div class="bot-details">
+                    <div class="bot-name">Telegram Bot</div>
+                    <div class="bot-status disconnected">未连接</div>
+                  </div>
+                </div>
+                <button class="bot-btn primary">连接</button>
+              </div>
+              <div class="bot-row">
+                <div class="bot-info">
+                  <span class="bot-icon">🏢</span>
+                  <div class="bot-details">
+                    <div class="bot-name">企业微信</div>
+                    <div class="bot-status disconnected">未连接</div>
+                  </div>
+                </div>
+                <button class="bot-btn primary">连接</button>
+              </div>
+              <div class="bot-row">
+                <div class="bot-info">
+                  <span class="bot-icon">钉</span>
+                  <div class="bot-details">
+                    <div class="bot-name">钉钉 Bot</div>
+                    <div class="bot-status disconnected">未连接</div>
+                  </div>
+                </div>
+                <button class="bot-btn primary">连接</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scheduler Settings -->
+          <div class="settings-panel" data-panel="scheduler">
+            <h2 class="settings-section-title">定时任务调度</h2>
+            <div class="settings-card">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">调度器状态</div>
+                  <div class="setting-desc">启用 cron 任务调度</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <h2 class="settings-section-title">已配置的任务</h2>
+            <div class="task-list-settings">
+              <div class="task-item">
+                <div class="task-check running">
+                  <span class="dot pulse"></span>
+                </div>
+                <div class="task-details">
+                  <div class="task-name">每日股票盯盘</div>
+                  <div class="task-schedule">每天 09:15 执行</div>
+                </div>
+                <div class="task-actions">
+                  <button class="ghost-btn small">编辑</button>
+                  <button class="ghost-btn small">停止</button>
+                </div>
+              </div>
+              <div class="task-item">
+                <div class="task-check">
+                  <span class="dot"></span>
+                </div>
+                <div class="task-details">
+                  <div class="task-name">每周数据备份</div>
+                  <div class="task-schedule">每周一 02:00 执行</div>
+                </div>
+                <div class="task-actions">
+                  <button class="ghost-btn small">编辑</button>
+                  <button class="ghost-btn small">启动</button>
+                </div>
+              </div>
+              <div class="task-item">
+                <div class="task-check">
+                  <span class="dot"></span>
+                </div>
+                <div class="task-details">
+                  <div class="task-name">微信消息摘要</div>
+                  <div class="task-schedule">每天 20:00 执行</div>
+                </div>
+                <div class="task-actions">
+                  <button class="ghost-btn small">编辑</button>
+                  <button class="ghost-btn small">启动</button>
+                </div>
+              </div>
+            </div>
+
+            <button class="add-task-btn">+ 添加定时任务</button>
+          </div>
+
+          <!-- Autonomous Mode -->
+          <div class="settings-panel" data-panel="autonomous">
+            <h2 class="settings-section-title">自主行动模式</h2>
+            <div class="settings-card">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">启用自主行动</div>
+                  <div class="setting-desc">用户离开后自动执行 SOP 任务</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">空闲检测时间</div>
+                  <div class="setting-desc">用户无操作后多少分钟触发</div>
+                </div>
+                <select class="setting-select small">
+                  <option>15 分钟</option>
+                  <option selected>30 分钟</option>
+                  <option>60 分钟</option>
+                  <option>120 分钟</option>
+                </select>
+              </div>
+            </div>
+
+            <h2 class="settings-section-title">桌面宠物</h2>
+            <div class="settings-card">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">显示宠物</div>
+                  <div class="setting-desc">在桌面上显示陪伴宠物</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">宠物外观</div>
+                  <div class="setting-desc">选择桌面宠物样式</div>
+                </div>
+                <div class="pet-selector">
+                  <div class="pet-option selected">
+                    <div class="pet-preview">🐱</div>
+                    <span>猫</span>
+                  </div>
+                  <div class="pet-option">
+                    <div class="pet-preview">🦊</div>
+                    <span>狐狸</span>
+                  </div>
+                  <div class="pet-option">
+                    <div class="pet-preview">🐶</div>
+                    <span>狗</span>
+                  </div>
+                  <div class="pet-option">
+                    <div class="pet-preview">🤖</div>
+                    <span>机器人</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Memory Management -->
+          <div class="settings-panel" data-panel="memory">
+            <h2 class="settings-section-title">分层记忆系统</h2>
+            <div class="memory-layers">
+              <div class="memory-layer">
+                <div class="layer-header">
+                  <span class="layer-badge l0">L0</span>
+                  <span class="layer-name">元规则</span>
+                  <span class="layer-size">3 条</span>
+                </div>
+                <div class="layer-desc">Agent 基础行为规则和系统约束</div>
+                <div class="layer-actions">
+                  <button class="ghost-btn small">查看</button>
+                  <button class="ghost-btn small">编辑</button>
+                </div>
+              </div>
+              <div class="memory-layer">
+                <div class="layer-header">
+                  <span class="layer-badge l1">L1</span>
+                  <span class="layer-name">记忆索引</span>
+                  <span class="layer-size">12 条</span>
+                </div>
+                <div class="layer-desc">极简索引层，用于快速路由与召回</div>
+                <div class="layer-actions">
+                  <button class="ghost-btn small">查看</button>
+                  <button class="ghost-btn small">编辑</button>
+                </div>
+              </div>
+              <div class="memory-layer">
+                <div class="layer-header">
+                  <span class="layer-badge l2">L2</span>
+                  <span class="layer-name">全局事实</span>
+                  <span class="layer-size">28 条</span>
+                </div>
+                <div class="layer-desc">长期运行中积累的稳定知识</div>
+                <div class="layer-actions">
+                  <button class="ghost-btn small">查看</button>
+                  <button class="ghost-btn small">编辑</button>
+                </div>
+              </div>
+              <div class="memory-layer">
+                <div class="layer-header">
+                  <span class="layer-badge l3">L3</span>
+                  <span class="layer-name">任务 Skills</span>
+                  <span class="layer-size">5 个</span>
+                </div>
+                <div class="layer-desc">可复用的工作流程和 SOP</div>
+                <div class="layer-actions">
+                  <button class="ghost-btn small">查看</button>
+                  <button class="ghost-btn small">编辑</button>
+                </div>
+              </div>
+              <div class="memory-layer">
+                <div class="layer-header">
+                  <span class="layer-badge l4">L4</span>
+                  <span class="layer-name">会话归档</span>
+                  <span class="layer-size">16 个</span>
+                </div>
+                <div class="layer-desc">已完成任务的归档记录</div>
+                <div class="layer-actions">
+                  <button class="ghost-btn small">查看</button>
+                  <button class="ghost-btn small">清理</button>
+                </div>
+              </div>
+            </div>
+            <button class="add-task-btn">+ 手动添加记忆</button>
+          </div>
+
+          <!-- Skills Management -->
+          <div class="settings-panel" data-panel="skills">
+            <h2 class="settings-section-title">技能树</h2>
+            <div class="settings-card">
+              <div class="skill-stats-row">
+                <div class="skill-stat">
+                  <span class="skill-stat-num">5</span>
+                  <span class="skill-stat-label">活跃技能</span>
+                </div>
+                <div class="skill-stat">
+                  <span class="skill-stat-num">67</span>
+                  <span class="skill-stat-label">总调用次数</span>
+                </div>
+                <div class="skill-stat">
+                  <span class="skill-stat-num">92%</span>
+                  <span class="skill-stat-label">成功率</span>
+                </div>
+              </div>
+            </div>
+
+            <h2 class="settings-section-title">已掌握的技能</h2>
+            <div class="skills-list">
+              <div class="skill-item">
+                <div class="skill-info">
+                  <span class="skill-icon">🌐</span>
+                  <div class="skill-details">
+                    <div class="skill-name">web_setup_sop</div>
+                    <div class="skill-meta">32 次调用 · 最后使用: 今天</div>
+                  </div>
+                </div>
+                <div class="skill-actions">
+                  <button class="ghost-btn small">导出</button>
+                  <button class="ghost-btn small">删除</button>
+                </div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-info">
+                  <span class="skill-icon">📨</span>
+                  <div class="skill-details">
+                    <div class="skill-name">feishu_integration</div>
+                    <div class="skill-meta">45 次调用 · 最后使用: 今天</div>
+                  </div>
+                </div>
+                <div class="skill-actions">
+                  <button class="ghost-btn small">导出</button>
+                  <button class="ghost-btn small">删除</button>
+                </div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-info">
+                  <span class="skill-icon">📄</span>
+                  <div class="skill-details">
+                    <div class="skill-name">ocr_utils</div>
+                    <div class="skill-meta">18 次调用 · 最后使用: 昨天</div>
+                  </div>
+                </div>
+                <div class="skill-actions">
+                  <button class="ghost-btn small">导出</button>
+                  <button class="ghost-btn small">删除</button>
+                </div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-info">
+                  <span class="skill-icon">📱</span>
+                  <div class="skill-details">
+                    <div class="skill-name">adb_ui</div>
+                    <div class="skill-meta">7 次调用 · 最后使用: 3 天前</div>
+                  </div>
+                </div>
+                <div class="skill-actions">
+                  <button class="ghost-btn small">导出</button>
+                  <button class="ghost-btn small">删除</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="skill-actions-row">
+              <button class="add-task-btn">+ 导入技能</button>
+              <button class="add-task-btn secondary">📦 技能市场</button>
+            </div>
+          </div>
+
+          <!-- Rewind -->
+          <div class="settings-panel" data-panel="rewind">
+            <h2 class="settings-section-title">会话时间旅行</h2>
+            <div class="settings-card">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">启用 Rewind</div>
+                  <div class="setting-desc">记录会话快照，支持回溯和分支</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">快照间隔</div>
+                  <div class="setting-desc">自动保存会话快照的频率</div>
+                </div>
+                <select class="setting-select small">
+                  <option>每 5 轮</option>
+                  <option selected>每 10 轮</option>
+                  <option>每 20 轮</option>
+                  <option>手动</option>
+                </select>
+              </div>
+            </div>
+
+            <h2 class="settings-section-title">可恢复的会话</h2>
+            <div class="rewind-list">
+              <div class="rewind-item">
+                <div class="rewind-time">今天 14:32</div>
+                <div class="rewind-preview">
+                  <span class="rewind-task">监控股票并提醒我</span>
+                  <span class="rewind-meta">Turn 7 · 可恢复到任意时间点</span>
+                </div>
+                <button class="ghost-btn small">恢复</button>
+              </div>
+              <div class="rewind-item">
+                <div class="rewind-time">今天 11:15</div>
+                <div class="rewind-preview">
+                  <span class="rewind-task">整理会议纪要发到飞书</span>
+                  <span class="rewind-meta">Turn 11 · 已完成</span>
+                </div>
+                <button class="ghost-btn small">查看</button>
+              </div>
+              <div class="rewind-item">
+                <div class="rewind-time">昨天 21:14</div>
+                <div class="rewind-preview">
+                  <span class="rewind-task">用 Gmail 发送月度报表</span>
+                  <span class="rewind-meta">Turn 23 · 已完成</span>
+                </div>
+                <button class="ghost-btn small">查看</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tools Configuration -->
+          <div class="settings-panel" data-panel="tools">
+            <h2 class="settings-section-title">浏览器配置</h2>
+            <div class="settings-card">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">浏览器模式</div>
+                  <div class="setting-desc">使用真实浏览器（保留登录态）</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">浏览器路径</div>
+                  <div class="setting-desc">Chrome/Edge 可执行文件路径</div>
+                </div>
+                <input type="text" class="setting-input" placeholder="自动检测">
+              </div>
+            </div>
+
+            <h2 class="settings-section-title">ADB 配置（手机控制）</h2>
+            <div class="settings-card">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">启用 ADB</div>
+                  <div class="setting-desc">通过 ADB 控制 Android 设备</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">ADB 路径</div>
+                  <div class="setting-desc">adb 可执行文件路径</div>
+                </div>
+                <input type="text" class="setting-input" placeholder="自动检测">
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">连接状态</div>
+                  <div class="setting-desc">当前连接的设备</div>
+                </div>
+                <div class="setting-value warning">未检测到设备</div>
+              </div>
+            </div>
+
+            <h2 class="settings-section-title">工作目录</h2>
+            <div class="settings-card">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <div class="setting-name">GenericAgent 根目录</div>
+                  <div class="setting-desc">设置 Agent 的工作根目录</div>
+                </div>
+                <input type="text" class="setting-input" value="/Users/lsdefine/GenericAgent">
+              </div>
+            </div>
+          </div>
+
+          <!-- About -->
+          <div class="settings-panel" data-panel="about">
+            <h2 class="settings-section-title">关于 GenericAgent</h2>
+            <div class="about-card">
+              <div class="about-logo">⬢</div>
+              <div class="about-name">GenericAgent</div>
+              <div class="about-version">v1.0.0</div>
+              <div class="about-desc">
+                极简、可自我进化的自主 Agent 框架<br>
+                核心仅 ~3K 行代码
+              </div>
+              <div class="about-links">
+                <a href="#">📄 技术报告</a>
+                <a href="#">📖 使用文档</a>
+                <a href="#">💬 社区群</a>
+              </div>
+            </div>
+
+            <h2 class="settings-section-title">系统信息</h2>
+            <div class="settings-card">
+              <div class="info-row">
+                <span class="info-label">操作系统</span>
+                <span class="info-value">macOS 14.0</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Python 版本</span>
+                <span class="info-value">3.10.12</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">运行时间</span>
+                <span class="info-value">已连续运行 7 天 3 小时</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>

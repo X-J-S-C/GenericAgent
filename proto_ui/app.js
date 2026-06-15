@@ -78,6 +78,28 @@
     setTimeout(() => clearInterval(tick), 30000);
   });
 
+  // ─── settings tab switching ───
+  document.querySelectorAll('.settings-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const panelId = tab.dataset.settings;
+      // Update active tab
+      document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      // Show corresponding panel
+      document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+      const targetPanel = document.querySelector(`.settings-panel[data-panel="${panelId}"]`);
+      if (targetPanel) targetPanel.classList.add('active');
+    });
+  });
+
+  // ─── pet selector ───
+  document.querySelectorAll('.pet-option').forEach(option => {
+    option.addEventListener('click', () => {
+      document.querySelectorAll('.pet-option').forEach(o => o.classList.remove('selected'));
+      option.classList.add('selected');
+    });
+  });
+
   // ─── expose for debug ───
   window.__proto = { activate };
 })();
