@@ -4,32 +4,43 @@
   'use strict';
 
   // ─── view switching ───
-  function activate(viewName) {
+  function activate(viewName, opts) {
+    // Switch view panels
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.nav-item, .session, .task-row, .action-card').forEach(el => {
-      el.classList.toggle(
-        'active',
-        el.dataset.view === viewName
-      );
+    // Sidebar nav: only the one matching the view
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.view === viewName);
     });
+    // Sessions: only ONE can be active — the clicked one
+    document.querySelectorAll('.session').forEach(el => el.classList.remove('active'));
+    if (opts && opts.sessionId) {
+      const s = document.querySelector(`.session[data-session="${opts.sessionId}"]`);
+      if (s) s.classList.add('active');
+    } else if (viewName === 'chat') {
+      const first = document.querySelector('.session');
+      if (first) first.classList.add('active');
+    }
     const target = document.querySelector(`.view[data-view="${viewName}"]`);
     if (target) {
       target.classList.add('active');
       target.style.animation = 'none';
-      // force reflow to retrigger fadeIn
       void target.offsetWidth;
       target.style.animation = '';
     }
-    // scroll main back to top
     document.querySelector('.main')?.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // nav buttons
+  // nav buttons & sessions
   document.querySelectorAll('[data-view]').forEach(el => {
     el.addEventListener('click', e => {
       e.preventDefault();
       const view = el.dataset.view;
-      if (view) activate(view);
+      if (!view) return;
+      if (el.classList.contains('session')) {
+        activate('chat', { sessionId: el.dataset.session });
+        return;
+      }
+      activate(view);
     });
   });
 
