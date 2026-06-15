@@ -238,6 +238,11 @@ async def switch_llm(payload: dict):
     n = payload.get("index")
     if n is None:
         raise HTTPException(400, "missing 'index'")
+    if not isinstance(n, int):
+        raise HTTPException(400, "'index' must be an integer")
+    n_clients = len(agent.llmclients)
+    if n < 0 or n >= n_clients:
+        raise HTTPException(400, f"index {n} out of range (0-{n_clients - 1}), {n_clients} LLM(s) available")
     try:
         agent.next_llm(n)
     except Exception as e:

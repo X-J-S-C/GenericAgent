@@ -1,23 +1,23 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "created_at": "2026-06-15",
   "updated_at": "2026-06-15",
   "milestones": {
-    "M1": {"name": "基础 API 打通", "priority": "high", "status": "in_progress"},
+    "M1": {"name": "基础 API 打通", "priority": "high", "status": "completed", "completed_at": "2026-06-15"},
     "M2": {"name": "多 Agent UI", "priority": "high", "status": "pending"},
     "M3": {"name": "设置与高级", "priority": "medium", "status": "pending"}
   },
   "tasks": {
-    "02": {"name": "后端 FastAPI 基础（HTTP + WS）", "milestone": "M1", "status": "done", "file": "api_server.py", "deps": ["fastapi", "uvicorn"]},
-    "03": {"name": "核心 Agent 接口（发送/停止/状态）", "milestone": "M1", "status": "done", "deps": ["02"]},
+    "02": {"name": "后端 FastAPI 基础（HTTP + WS）", "milestone": "M1", "status": "done", "file": "api_server.py"},
+    "03": {"name": "核心 Agent 接口（发送/停止/状态）", "milestone": "M1", "status": "done"},
     "04": {"name": "会话管理 API（列表/恢复/删除）", "milestone": "M2", "status": "pending"},
-    "05": {"name": "LLM 模型切换 API", "milestone": "M1", "status": "done", "deps": ["02"]},
+    "05": {"name": "LLM 模型切换 API", "milestone": "M1", "status": "done"},
     "06": {"name": "设置/配置读写 API", "milestone": "M3", "status": "pending"},
     "07": {"name": "文件 API（浏览/读/写/上传）", "milestone": "M3", "status": "pending"},
-    "08": {"name": "proto_ui 数据驱动化", "milestone": "M1", "status": "done", "file": "proto_ui/app.js", "deps": ["02"]},
-    "09": {"name": "统一 JSON 数据格式（message/tool_call/session）", "milestone": "M1", "status": "done", "file": "assets/api_schema.json", "deps": ["02"]},
-    "10": {"name": "前端数据驱动化（mock → 真实 API）", "milestone": "M1", "status": "done", "deps": ["08"]},
-    "11": {"name": "聊天视图动态渲染", "milestone": "M1", "status": "pending"},
+    "08": {"name": "proto_ui 数据驱动化", "milestone": "M1", "status": "done", "file": "proto_ui/app.js"},
+    "09": {"name": "统一 JSON 数据格式", "milestone": "M1", "status": "done", "file": "assets/api_schema.json"},
+    "10": {"name": "前端 mock → 真实 API", "milestone": "M1", "status": "done"},
+    "11": {"name": "聊天视图动态渲染", "milestone": "M1", "status": "done"},
     "12": {"name": "输入框增强（文件拖拽 + 代码高亮）", "milestone": "M2", "status": "pending"},
     "13": {"name": "指挥家视图", "milestone": "M2", "status": "pending"},
     "14": {"name": "蜂巢视图", "milestone": "M2", "status": "pending"},
@@ -25,13 +25,13 @@
     "16": {"name": "设置面板功能化", "milestone": "M3", "status": "pending"},
     "17": {"name": "记忆管理视图", "milestone": "M3", "status": "pending"},
     "18": {"name": "桌面宠物组件", "milestone": "M3", "status": "pending"},
-    "19": {"name": "WebSocket 连接状态 UI", "milestone": "M2", "status": "pending"},
+    "19": {"name": "WebSocket 连接状态 UI", "milestone": "M1", "status": "done"},
     "20": {"name": "错误处理与空状态", "milestone": "M3", "status": "pending"},
     "21": {"name": "前端工程化脚本", "milestone": "M2", "status": "pending"},
     "22": {"name": "前端 Store（状态管理）", "milestone": "M2", "status": "pending"},
     "23": {"name": "统一 Python 启动脚本", "milestone": "M1", "status": "done", "file": "start.py"},
     "24": {"name": "README & 启动说明", "milestone": "M3", "status": "pending"},
-    "25": {"name": "端到端测试", "milestone": "M1", "status": "pending"}
+    "25": {"name": "端到端测试", "milestone": "M1", "status": "done", "file": "test_m1_acceptance.py"}
   },
   "api_routes": {
     "GET /": "服务健康检查",
