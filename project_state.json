@@ -1,0 +1,47 @@
+{
+  "project": "GeneraticAgent",
+  "tasks": {
+    "task_02_backend_fastapi": {
+      "status": "done",
+      "description": "FastAPI 后端基础：暴露 HTTP + WebSocket 接口，托管 GeneraticAgent。",
+      "files": [
+        "/workspace/api_server.py",
+        "/workspace/pyproject.toml"
+      ],
+      "entrypoint": "uvicorn api_server:app --host 0.0.0.0 --port 18792 --reload",
+      "routes": {
+        "GET /": "健康检查",
+        "GET /api/status": "Agent 运行状态",
+        "GET /api/llms": "列出可用 LLM",
+        "POST /api/llm/switch": "切换 LLM (body: {\"index\": int})",
+        "POST /api/abort": "中止当前任务",
+        "POST /api/chat": "提交聊天消息 (body: {\"query\": string, \"source?\": string, \"images?\": [string]}) 返回 task_id",
+        "WS /ws/{task_id}": "订阅任务流式输出"
+      },
+      "websocket_protocol": {
+        "client_in": [
+          "{\"type\": \"subscribe\"}",
+          "{\"type\": \"abort\"}",
+          "{\"type\": \"ping\"}"
+        ],
+        "server_out": [
+          "{\"type\": \"next\", \"content\": \"...\", \"source\": \"agent\"}",
+          "{\"type\": \"done\", \"content\": \"...\"}",
+          "{\"type\": \"error\", \"message\": \"...\"}",
+          "{\"type\": \"pong\"}"
+        ]
+      },
+      "notes": [
+        "Agent 在 daemon 线程中运行；由 FastAPI lifespan 启动。",
+        "HTTP POST /api/chat 返回 task_id，前端再通过 /ws/{task_id} 接收流。",
+        "task registry 带 10 分钟 TTL，避免长期闲置占用内存。"
+      ]
+    }
+  },
+  "pending_tasks": [
+    "task_09_unified_json_format",
+    "task_23_launch_script",
+    "task_frontend_ui"
+  ],
+  "last_updated": "2026-06-15"
+}
