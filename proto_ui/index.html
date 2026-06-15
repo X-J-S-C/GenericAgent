@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GenericAgent</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ═══ SIDEBAR ══════════════════════════════════════════════ -->
+    <nav id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">GA</div>
+        <div class="logo-text">
+          <span class="logo-name">GenericAgent</span>
+          <span class="logo-sub" id="llm-badge">loading…</span>
+        </div>
+        <button id="btn-abort" class="icon-btn danger" title="停止当前任务" style="display:none">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <rect x="3" y="3" width="10" height="10" rx="1"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-views">
+        <button class="view-btn active" data-view="chat" title="聊天">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>聊天</span>
+        </button>
+        <button class="view-btn" data-view="conductor" title="指挥家">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9 2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9 2.83-2.83"/>
+          </svg>
+          <span>指挥家</span>
+        </button>
+        <button class="view-btn" data-view="hive" title="蜂巢">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l6 3.75v7.5L12 17l-6-3.75V5.75L12 2zM12 22l6-3.75M12 22l-6-3.75M0 12h6M18 12h6"/>
+          </svg>
+          <span>蜂巢</span>
+        </button>
+        <button class="view-btn" data-view="morph" title="变形者">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          <span>变形者</span>
+        </button>
+        <button class="view-btn" data-view="memory" title="记忆">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
+          </svg>
+          <span>记忆</span>
+        </button>
+        <button class="view-btn" data-view="settings" title="设置">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>设置</span>
+        </button>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="ws-status" id="ws-status">
+          <span class="ws-dot offline"></span>
+          <span class="ws-label">未连接</span>
+        </div>
+        <div class="agent-status-mini" id="agent-status-mini">
+          <span class="status-dot idle"></span>
+          <span>待机</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ═══ MAIN CONTENT ════════════════════════════════════════ -->
+    <main id="main-content">
+
+      <!-- ── VIEW: CHAT ─────────────────────────────────────── -->
+      <section id="view-chat" class="view active">
+        <div class="view-header">
+          <h2 class="view-title">聊天</h2>
+          <div class="header-actions">
+            <button id="btn-clear-chat" class="btn btn-ghost btn-sm" title="清空对话">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              </svg>
+            </button>
+            <button id="btn-export-chat" class="btn btn-ghost btn-sm" title="导出对话">导出</button>
+          </div>
+        </div>
+
+        <div id="chat-messages" class="chat-messages">
+          <div class="empty-state" id="chat-empty">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <p class="empty-title">开始对话</p>
+            <p class="empty-sub">输入消息与 GenericAgent 交流</p>
+          </div>
+        </div>
+
+        <!-- Tool call card (hidden by default) -->
+        <div id="tool-card" class="tool-card hidden">
+          <div class="tool-card-header">
+            <span class="tool-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M22 14h-2V7a2 2 0 0 0-2-2h-6l-2-3H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2z"/></svg>
+              <span id="tool-name">tool_name</span>
+            </span>
+            <button id="tool-card-close" class="icon-btn" title="关闭">×</button>
+          </div>
+          <pre id="tool-args" class="tool-args"></pre>
+        </div>
+
+        <!-- Chat input area -->
+        <div class="chat-input-area">
+          <div class="input-container">
+            <textarea
+              id="chat-input"
+              class="chat-input"
+              placeholder="输入消息... (Shift+Enter 换行，Enter 发送)"
+              rows="1"
+              autocomplete="off"
+              spellcheck="false"
+            ></textarea>
+            <button id="btn-send" class="btn-send" title="发送 (Enter)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+          <div class="input-meta">
+            <span id="running-indicator" class="running-indicator hidden">
+              <span class="spin"></span> Agent 运行中…
+            </span>
+            <span id="char-count" class="char-count"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: CONDUCTOR ─────────────────────────────────── -->
+      <section id="view-conductor" class="view">
+        <div class="view-header">
+          <h2 class="view-title">指挥家</h2>
+          <button id="btn-spawn-agent" class="btn btn-primary btn-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            新建子 Agent
+          </button>
+        </div>
+        <div id="conductor-grid" class="conductor-grid">
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9 2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9 2.83-2.83"/>
+              </svg>
+            </div>
+            <p class="empty-title">暂无子 Agent</p>
+            <p class="empty-sub">点击「新建子 Agent」开始多 Agent 协作</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: HIVE ──────────────────────────────────────── -->
+      <section id="view-hive" class="view">
+        <div class="view-header">
+          <h2 class="view-title">蜂巢</h2>
+          <button id="btn-broadcast" class="btn btn-primary btn-sm">广播消息</button>
+        </div>
+        <div id="hive-board" class="hive-board">
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2l6 3.75v7.5L12 17l-6-3.75V5.75L12 2zM12 22l6-3.75M12 22l-6-3.75M0 12h6M18 12h6"/>
+              </svg>
+            </div>
+            <p class="empty-title">蜂巢公告板</p>
+            <p class="empty-sub">多 Agent 公告和状态聚合</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: MORPH ─────────────────────────────────────── -->
+      <section id="view-morph" class="view">
+        <div class="view-header">
+          <h2 class="view-title">变形者</h2>
+        </div>
+        <div class="morph-container">
+          <div class="morph-card">
+            <h3>能力导入</h3>
+            <p>从外部导入 Agent 能力配置</p>
+            <div class="morph-drop-zone" id="morph-drop">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span>拖放 JSON 文件到这里</span>
+            </div>
+          </div>
+          <div class="morph-card">
+            <h3>导出当前能力</h3>
+            <p>将当前 Agent 配置导出为 JSON</p>
+            <button id="btn-export-caps" class="btn btn-secondary">导出能力</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: MEMORY ─────────────────────────────────────── -->
+      <section id="view-memory" class="view">
+        <div class="view-header">
+          <h2 class="view-title">记忆管理</h2>
+          <button id="btn-add-memory" class="btn btn-primary btn-sm">添加记忆</button>
+        </div>
+        <div id="memory-layers" class="memory-layers">
+          <div class="memory-layer" data-layer="L0">
+            <div class="layer-header"><span class="layer-badge">L0</span><h4>原始会话</h4></div>
+            <div class="layer-content" id="mem-L0"><p class="empty-sub">无数据</p></div>
+          </div>
+          <div class="memory-layer" data-layer="L1">
+            <div class="layer-header"><span class="layer-badge">L1</span><h4>工作记忆</h4></div>
+            <div class="layer-content" id="mem-L1"><p class="empty-sub">无数据</p></div>
+          </div>
+          <div class="memory-layer" data-layer="L2">
+            <div class="layer-header"><span class="layer-badge">L2</span><h4>全局记忆</h4></div>
+            <div class="layer-content" id="mem-L2"><p class="empty-sub">无数据</p></div>
+          </div>
+          <div class="memory-layer" data-layer="L3">
+            <div class="layer-header"><span class="layer-badge">L3</span><h4>技能库</h4></div>
+            <div class="layer-content" id="mem-L3"><p class="empty-sub">无数据</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW: SETTINGS ──────────────────────────────────── -->
+      <section id="view-settings" class="view">
+        <div class="view-header">
+          <h2 class="view-title">设置</h2>
+        </div>
+        <div class="settings-container">
+          <div class="settings-group">
+            <h3 class="settings-group-title">LLM 模型</h3>
+            <div id="llm-list" class="llm-list">
+              <div class="llm-item skeleton">
+                <div class="skeleton-text w-60"></div>
+                <div class="skeleton-text w-40"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">记忆配置</h3>
+            <div class="setting-row">
+              <label class="setting-label">工作记忆大小</label>
+              <input type="number" id="setting-work-mem" class="setting-input" value="10" min="1" max="100" />
+            </div>
+            <div class="setting-row">
+              <label class="setting-label">最大回合数</label>
+              <input type="number" id="setting-max-turns" class="setting-input" value="70" min="1" max="200" />
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">显示</h3>
+            <div class="setting-row">
+              <label class="setting-label">深色模式</label>
+              <label class="toggle">
+                <input type="checkbox" id="setting-dark" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">关于</h3>
+            <p class="settings-about">GenericAgent v0.2.0<br/>自进化自主智能体框架</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "created_at": "2026-06-15",
   "updated_at": "2026-06-15",
   "milestones": {
@@ -14,9 +14,9 @@
     "05": {"name": "LLM 模型切换 API", "milestone": "M1", "status": "done", "deps": ["02"]},
     "06": {"name": "设置/配置读写 API", "milestone": "M3", "status": "pending"},
     "07": {"name": "文件 API（浏览/读/写/上传）", "milestone": "M3", "status": "pending"},
-    "08": {"name": "proto_ui 数据驱动化", "milestone": "M1", "status": "pending"},
+    "08": {"name": "proto_ui 数据驱动化", "milestone": "M1", "status": "done", "file": "proto_ui/app.js", "deps": ["02"]},
     "09": {"name": "统一 JSON 数据格式（message/tool_call/session）", "milestone": "M1", "status": "done", "file": "assets/api_schema.json", "deps": ["02"]},
-    "10": {"name": "前端数据驱动化（mock → 真实 API）", "milestone": "M1", "status": "pending"},
+    "10": {"name": "前端数据驱动化（mock → 真实 API）", "milestone": "M1", "status": "done", "deps": ["08"]},
     "11": {"name": "聊天视图动态渲染", "milestone": "M1", "status": "pending"},
     "12": {"name": "输入框增强（文件拖拽 + 代码高亮）", "milestone": "M2", "status": "pending"},
     "13": {"name": "指挥家视图", "milestone": "M2", "status": "pending"},
@@ -69,7 +69,10 @@
   },
   "files": {
     "api_server.py": "FastAPI 后端主文件（任务 02, 03, 05 完成）",
-    "assets/api_schema.json": "统一 JSON 数据格式 Schema（任务 09 完成）",
+    "assets/api_schema.json": "JSON 数据格式定义（任务 09 完成）",
+    "proto_ui/index.html": "Web UI 主页面（任务 08 完成）",
+    "proto_ui/styles.css": "温暖陶土色设计系统（任务 08 完成）",
+    "proto_ui/app.js": "前端状态管理 + API 集成（任务 08, 10 完成）",
     "start.py": "统一 Python 启动脚本（任务 23 完成）"
   }
 }
