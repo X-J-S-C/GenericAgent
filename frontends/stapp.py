@@ -1,4 +1,4 @@
-import os, sys, subprocess
+import os, sys, subprocess, asyncio
 from urllib.request import urlopen
 from urllib.parse import quote
 if sys.stdout is None: sys.stdout = open(os.devnull, "w")
@@ -12,23 +12,25 @@ sys.path.append(os.path.abspath(os.path.join(script_dir, '..')))
 sys.path.append(os.path.abspath(script_dir))
 
 import streamlit as st
-import time, json, re, threading, queue
-from agentmain import GeneraticAgent
-import chatapp_common  # activate /continue command (monkey patches GeneraticAgent)
+import time, json, re, threading
+import chatapp_common  # activate /continue command (monkey patches GeneriAgent)
 from continue_cmd import handle_frontend_command, reset_conversation, list_sessions, extract_ui_messages
+
+# Task 10: Use AgentAPIClient for data-driven frontend architecture
+from api_client import AgentAPIClient, ApiMessage, MsgSubtype
 
 st.set_page_config(page_title="Cowork", layout="wide")
 
 @st.cache_resource
 def init():
-    agent = GeneraticAgent()
-    if agent.llmclient is None:
+    client = AgentAPIClient()
+    client.start()
+    if client.agent.llmclient is None:
         st.error("⚠️ 未配置任何可用的 LLM 接口，请设置mykey.py。")
         st.stop()
-    else: threading.Thread(target=agent.run, daemon=True).start()
-    return agent
+    return client
 
-agent = init()
+client = init()
 
 st.title("🖥️ Cowork")
 
@@ -36,24 +38,24 @@ if 'autonomous_enabled' not in st.session_state: st.session_state.autonomous_ena
 
 @st.fragment
 def render_sidebar():
-    llm_options = agent.list_llms()
-    current_idx = agent.llm_no
+    llm_options = client.list_llms()
+    current_idx = client.agent.llm_no
     llm_labels = {idx: f"{idx}: {(name or '').strip()}" for idx, name, _ in llm_options}
     st.caption(f"LLM Core: {llm_labels.get(current_idx, str(current_idx))}", help="下拉切换备用链路")
     selected_idx = st.selectbox("备用链路", [idx for idx, _, _ in llm_options], index=next((i for i, (idx, _, _) in enumerate(llm_options) if idx == current_idx), 0), format_func=llm_labels.get, label_visibility="collapsed", key="sidebar_llm_select")
     if selected_idx != current_idx:
-        agent.next_llm(selected_idx); st.rerun(scope="fragment")
+        client.next_llm(selected_idx); st.rerun(scope="fragment")
     last_reply_time = st.session_state.get('last_reply_time', 0)
     if last_reply_time > 0:
         st.caption(f"空闲时间：{int(time.time()) - last_reply_time}秒", help="当超过30分钟未收到回复时，系统会自动任务")
     if st.button("强行停止任务"):
-        agent.abort(); st.toast("已发送停止信号"); st.rerun()
+        client.abort(); st.toast("已发送停止信号"); st.rerun()
     if st.button("重新注入工具"):
-        agent.llmclient.last_tools = ''
+        client.agent.llmclient.last_tools = ''
         try:
             hist_path = os.path.join(script_dir, '..', 'assets', 'tool_usable_history.json')
             with open(hist_path, 'r', encoding='utf-8') as f: tool_hist = json.load(f)
-            agent.llmclient.backend.history.extend(tool_hist)
+            client.agent.llmclient.backend.history.extend(tool_hist)
             st.toast(f"已重新注入工具，追加了 {len(tool_hist)} 条示范记录")
         except Exception as e: st.toast(f"注入工具示范失败: {e}")
     if st.button("🐱 桌面宠物"):
@@ -66,17 +68,17 @@ def render_sidebar():
                 try: urlopen(f'http://127.0.0.1:41983/?{q}', timeout=2)
                 except Exception: pass
             threading.Thread(target=_do, daemon=True).start()
-        agent._pet_req = _pet_req
-        if not hasattr(agent, '_turn_end_hooks'): agent._turn_end_hooks = {}
+        client.agent._pet_req = _pet_req
+        if not hasattr(client.agent, '_turn_end_hooks'): client.agent._turn_end_hooks = {}
         def _pet_hook(ctx):
             parts = [f"Turn {ctx.get('turn','?')}"]
             if ctx.get('summary'): parts.append(ctx['summary'])
             if ctx.get('exit_reason'): parts.append('任务已完成')
             _pet_req(f'msg={quote(chr(10).join(parts))}')
             if ctx.get('exit_reason'): _pet_req('state=idle')
-        agent._turn_end_hooks['pet'] = _pet_hook
+        client.agent._turn_end_hooks['pet'] = _pet_hook
         st.toast("桌面宠物已启动")
-    
+
     st.divider()
     if st.button("开始空闲自主行动"):
         st.session_state.last_reply_time = int(time.time()) - 1800
@@ -95,7 +97,6 @@ with st.sidebar: render_sidebar()
 
 def fold_turns(text):
     """Return list of segments: [{'type':'text','content':...}, {'type':'fold','title':...,'content':...}]"""
-    # 先把4+反引号块替换为占位符，避免误切子agent嵌套的 LLM Running
     _ph = []
     safe = re.sub(r'`{4,}.*?`{4,}', lambda m: (_ph.append(m.group(0)), f'\x00PH{len(_ph)-1}\x00')[1], text, flags=re.DOTALL)
     parts = re.split(r'(\**LLM Running \(Turn \d+\) \.\.\.\*\**)', safe)
@@ -121,46 +122,61 @@ def fold_turns(text):
         else: segments.append({'type': 'text', 'content': marker + content})
     return segments
 def render_segments(segments, suffix=''):
-    # 整块重画：调用方用 slot.container() 包裹，保证 DOM 路径稳定、跨 rerun 对齐（消除"灰色重影"）。
-    # heartbeat 空转时 segments 不变 → Streamlit 后端 diff 无变化 → 前端零闪烁；
-    # 但 container/markdown 本身是 API 调用，StopException 仍会被抛出（abort 照常起作用）。
     for seg in segments:
         if seg['type'] == 'fold':
             with st.expander(seg['title'], expanded=False): st.markdown(seg['content'])
         else:
             st.markdown(seg['content'] + suffix)
 
+def _run_async_gen(async_gen):
+    """Run an async generator in a thread, yielding sync items."""
+    loop = asyncio.new_event_loop()
+    try:
+        gen = async_gen
+        while True:
+            try:
+                item = loop.run_until_complete(gen.__anext__())
+                yield item
+            except StopAsyncIteration:
+                break
+    finally:
+        loop.close()
+
 def agent_backend_stream(prompt):
-    display_queue = agent.put_task(prompt, source="user")
+    """
+    Stream responses from the agent as strings (legacy interface).
+    Internally uses AgentAPIClient.send_message() which yields ApiMessage objects.
+    """
+    async def _stream():
+        async for msg in client.send_message(prompt, source="user"):
+            if msg.subtype == MsgSubtype.NEXT and msg.content:
+                yield msg.content
+            elif msg.subtype == MsgSubtype.DONE:
+                yield msg.content
+                break
+
     response = ''
     try:
-        while True:
-            try: item = display_queue.get(timeout=1)
-            except queue.Empty:
-                yield response   # heartbeat: let outer st.markdown() run → Streamlit checks StopException
-                continue
-            if 'next' in item:
-                response = item['next']; yield response
-            if 'done' in item:
-                yield item['done']; break
-    finally: agent.abort()
+        for chunk in _run_async_gen(_stream()):
+            response = chunk
+            yield response
+    finally:
+        client.abort()
 
 if "messages" not in st.session_state: st.session_state.messages = []
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
-        # 用 slot=st.empty() + with slot.container(): ... 的外壳，DOM 路径和流式渲染完全一致，跨 rerun 对齐
         slot = st.empty()
         with slot.container():
             if msg["role"] == "assistant": render_segments(fold_turns(msg["content"]))
             else: st.markdown(msg["content"])
 
-# Scroll-height ghost fix: during streaming, expander open/close mid-animation can leave
-# phantom height → scrollbar long but can't scroll to bottom. Periodically detect & reflow.
+# Scroll-height ghost fix + IME fix (unchanged)
 try:
-    from streamlit import iframe as _st_iframe  # 1.56+
+    from streamlit import iframe as _st_iframe
     _embed_html = lambda html, **kw: _st_iframe(html, **{k: max(v, 1) if isinstance(v, int) else v for k, v in kw.items()})
 except (ImportError, AttributeError):
-    from streamlit.components.v1 import html as _embed_html  # ≤1.55
+    from streamlit.components.v1 import html as _embed_html
 _js_scroll_fix = ("!function(){var p=window.parent;if(p.__sfx)return;p.__sfx=1;"
     "var d=p.document;setInterval(function(){"
     "var m=d.querySelector('section.main');if(!m)return;"
@@ -168,7 +184,6 @@ _js_scroll_fix = ("!function(){var p=window.parent;if(p.__sfx)return;p.__sfx=1;"
     "if(m.scrollHeight>b.scrollHeight+150){"
     "m.style.overflow='hidden';void m.offsetHeight;m.style.overflow=''}"
     "},3000)}()")
-# IME composition fix (macOS only) - prevents Enter from submitting during CJK input
 _js_ime_fix = ("" if os.name == 'nt' else
     "!function(){if(window.parent.__imeFix)return;window.parent.__imeFix=1;"
     "var d=window.parent.document,c=0;"
@@ -194,15 +209,14 @@ if prompt := st.chat_input("any task?"):
         st.session_state.last_reply_time = int(time.time())
         st.rerun()
     if cmd == "/new":
-        st.session_state.messages = [{"role": "assistant", "content": reset_conversation(agent), "time": ts}]
+        st.session_state.messages = [{"role": "assistant", "content": reset_conversation(client.agent), "time": ts}]
         _reset_and_rerun()
     if cmd.startswith("/continue"):
         m = re.match(r'/continue\s+(\d+)\s*$', cmd.strip())
         sessions = list_sessions(exclude_pid=os.getpid()) if m else []
         idx = int(m.group(1)) - 1 if m else -1
-        # Resolve target path BEFORE handle (which snapshots current log, shifting indices).
         target = sessions[idx][0] if 0 <= idx < len(sessions) else None
-        result = handle_frontend_command(agent, cmd)
+        result = handle_frontend_command(client.agent, cmd)
         history = extract_ui_messages(target) if target and result.startswith('✅') else None
         tail = [{"role": "assistant", "content": result, "time": ts}]
         if history:
@@ -212,7 +226,7 @@ if prompt := st.chat_input("any task?"):
                 [{"role": "user", "content": cmd, "time": ts}] + tail
         _reset_and_rerun()
     st.session_state.messages.append({"role": "user", "content": prompt})
-    if hasattr(agent, '_pet_req') and not prompt.startswith('/'): agent._pet_req('state=walk')
+    if hasattr(client.agent, '_pet_req') and not prompt.startswith('/'): client.agent._pet_req('state=walk')
     with st.chat_message("user"): st.markdown(prompt)
 
     with st.chat_message("assistant"):
@@ -224,7 +238,7 @@ if prompt := st.chat_input("any task?"):
             while frozen < n_done:
                 with live.container(): render_segments([segs[frozen]])
                 live = st.empty(); frozen += 1
-            with live.container(): render_segments([segs[-1]], suffix=CURSOR)   # live 区域
+            with live.container(): render_segments([segs[-1]], suffix=CURSOR)
         segs = fold_turns(response)
         for i in range(frozen, len(segs)):
             with live.container(): render_segments([segs[i]])

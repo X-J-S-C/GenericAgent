@@ -37,31 +37,21 @@
           "error_code": "string | null"
         }
       }
+    }
+  },
+  "task_10_frontend_data_driven": {
+    "status": "completed",
+    "files": ["frontends/api_client.py", "frontends/stapp.py"],
+    "design": {
+      "AgentAPIClient": "Wraps local GeneriAgent, exposes async send_message() that yields ApiMessage objects",
+      "RemoteAgentAPIClient": "Connects to api_server WebSocket, yields ApiMessage objects (needs websockets + aiohttp)",
+      "stapp_refactor": "Replaced direct GeneriAgent usage with AgentAPIClient; agent_backend_stream() now uses client.send_message() internally",
+      "shared_enums": "MsgType, MsgSubtype, Role, ApiMessage mirrored in api_client.py for frontend use"
     },
-    "websocket_protocol": {
-      "client_send": [
-        {"type": "control", "subtype": "subscribe", "description": "Subscribe/drain queue for task"},
-        {"type": "control", "subtype": "abort",     "description": "Abort running task"},
-        {"type": "control", "subtype": "ping",      "description": "Keep-alive ping"}
-      ],
-      "server_send": [
-        {"type": "message",  "subtype": "next",        "fields": ["task_id", "content", "role", "metadata"]},
-        {"type": "message",  "subtype": "done",        "fields": ["task_id", "content", "role", "metadata"]},
-        {"type": "message",  "subtype": "start",       "fields": ["task_id", "content", "role", "metadata"]},
-        {"type": "control",  "subtype": "abort_ack",   "fields": ["task_id"]},
-        {"type": "control",  "subtype": "pong",        "fields": []},
-        {"type": "status",   "subtype": "agent_status", "fields": ["metadata.is_running", "metadata.llm_no", "metadata.llm_name"]},
-        {"type": "status",   "subtype": "llm_list",     "fields": ["content (JSON array)"]},
-        {"type": "status",   "subtype": "llm_switched", "fields": ["metadata.llm_no", "metadata.llm_name"]},
-        {"type": "error",    "subtype": "error",        "fields": ["task_id", "content", "metadata.error_code"]}
-      ]
-    },
-    "design_notes": [
-      "Single ApiMessage envelope for ALL WS and HTTP communications",
-      "Enums: MsgType, MsgSubtype, Role for type safety",
-      "Convenience constructors: msg_next(), msg_done(), msg_pong(), msg_abort_ack(), msg_error(), msg_agent_status(), msg_llm_list(), msg_llm_switched()",
-      "to_ws_dict() serializes for transport; from_dict() parses incoming",
-      "Metadata.timestamp auto-generated as ISO8601 UTC"
+    "key_changes": [
+      "frontends/api_client.py: NEW - shared client module with ApiMessage schema",
+      "frontends/stapp.py: Uses AgentAPIClient instead of direct GeneriAgent",
+      "pyproject.toml: Added api-client extra (websockets, aiohttp) for RemoteAgentAPIClient"
     ]
   },
   "m1_milestone_progress": {
@@ -69,13 +59,13 @@
     "task_03": {"status": "completed",     "note": "Core agent interface (GeneriAgent class)"},
     "task_05": {"status": "completed",     "note": "LLM switching (list_llms, next_llm)"},
     "task_09": {"status": "completed",     "note": "Unified JSON data format (ApiMessage schema)"},
-    "task_10": {"status": "pending",       "note": "Frontend data-driven architecture"},
+    "task_10": {"status": "completed",     "note": "Frontend data-driven architecture (AgentAPIClient)"},
     "task_11": {"status": "pending",       "note": "Chat view dynamic rendering"},
     "task_23": {"status": "pending",       "note": "Unified Python startup script"},
     "task_25": {"status": "pending",       "note": "End-to-end integration test"}
   },
   "next_entry_points": [
-    "Task 10 - Frontend data-driven architecture",
+    "Task 11 - Chat view dynamic rendering",
     "Task 23 - Unified Python startup script"
   ]
 }

@@ -25,6 +25,10 @@ ui = [
     "streamlit>=1.28",
     "pywebview>=4.0",
 ]
+api-client = [
+    "websockets>=11.0",
+    "aiohttp>=3.9",
+]
 all-frontends = [
     "python-telegram-bot>=20.0",
     "qq-botpy>=1.0",
