@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>Generic Agent · Demo（会话隔离版）</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0f1115; color: #e6e6e6; }
+  #app { display: flex; height: 100vh; }
+
+  /* 侧边栏：会话列表 */
+  #sidebar { width: 280px; background: #151923; border-right: 1px solid #262b3a; display: flex; flex-direction: column; flex-shrink: 0; }
+  #sidebar header { padding: 12px 14px; border-bottom: 1px solid #262b3a; }
+  #sidebar header h1 { margin: 0; font-size: 15px; font-weight: 600; color: #fff; }
+  #sidebar header .sub { font-size: 12px; color: #8b93a7; margin-top: 4px; }
+  .btn { padding: 8px 12px; background: #2b3247; border: 1px solid #374156; color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .btn:hover { background: #333c55; }
+  .btn.primary { background: #4c6ef5; border-color: #4c6ef5; }
+  .btn.primary:hover { background: #5d7dff; }
+  .btn.sm { padding: 5px 9px; font-size: 12px; }
+  .btn-row { padding: 10px 12px; display: flex; gap: 6px; border-bottom: 1px solid #262b3a; }
+
+  #session-list { flex: 1; overflow-y: auto; padding: 6px; }
+  .session-item { padding: 10px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; }
+  .session-item:hover { background: #1c2233; }
+  .session-item.active { background: #22304c; border-color: #4c6ef5; }
+  .session-item .title { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .session-item .meta { font-size: 11px; color: #8b93a7; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
+  .session-item .tag { background: #4c6ef5; color: #fff; padding: 1px 6px; border-radius: 3px; font-size: 10px; }
+  .session-item .tag.idle { background: #374156; }
+  .session-item .del { opacity: 0.6; cursor: pointer; }
+  .session-item .del:hover { opacity: 1; color: #ff6b6b; }
+
+  /* 主聊天区 */
+  #chat { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #chat header { padding: 10px 16px; border-bottom: 1px solid #262b3a; display: flex; align-items: center; gap: 10px; background: #151923; }
+  #chat header #status { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff6b6b; }
+  #chat header #status.on { background: #51cf66; }
+  #chat header .title { font-size: 14px; font-weight: 600; }
+  #chat header .session-id { color: #8b93a7; font-size: 12px; font-family: monospace; }
+  #chat header .spacer { flex: 1; }
+
+  #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 85%; padding: 10px 14px; border-radius: 10px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; font-size: 13.5px; }
+  .msg.user { align-self: flex-end; background: #2b3247; border: 1px solid #374156; }
+  .msg.bot { align-self: flex-start; background: #1c2233; border: 1px solid #262b3a; }
+  .msg.bot.active { border-color: #4c6ef5; }
+  .msg.system { align-self: center; background: #2a3145; color: #9db1ff; font-size: 12px; font-style: italic; padding: 6px 12px; }
+  .msg .label { font-size: 11px; color: #8b93a7; margin-bottom: 4px; font-family: monospace; }
+  .msg .cursor::after { content: '▋'; animation: blink 1s steps(1) infinite; color: #4c6ef5; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  #input { padding: 10px 14px; border-top: 1px solid #262b3a; background: #151923; display: flex; gap: 8px; }
+  #input textarea { flex: 1; resize: none; padding: 10px 12px; background: #0f1115; border: 1px solid #262b3a; color: #fff; border-radius: 6px; font-size: 13.5px; font-family: inherit; min-height: 44px; max-height: 200px; outline: none; }
+  #input textarea:focus { border-color: #4c6ef5; }
+  #input .right-col { display: flex; flex-direction: column; gap: 6px; }
+  #input .hint { font-size: 11px; color: #8b93a7; text-align: right; }
+
+  .cmd-bar { padding: 6px 14px; background: #1a2030; border-bottom: 1px solid #262b3a; display: flex; gap: 6px; flex-wrap: wrap; }
+  .cmd-bar .chip { background: #22304c; color: #9db1ff; border: 1px solid #2e3b5a; border-radius: 12px; padding: 3px 10px; font-size: 11.5px; cursor: pointer; }
+  .cmd-bar .chip:hover { background: #2c3a5c; }
+
+  /* 简单滚动条样式 */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #0f1115; }
+  ::-webkit-scrollbar-thumb { background: #2b3247; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #374156; }
+
+  .empty { color: #8b93a7; text-align: center; padding: 40px 20px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <header>
+      <h1>💬 会话</h1>
+      <div class="sub">每个会话独立保存历史</div>
+    </header>
+    <div class="btn-row">
+      <button class="btn primary" id="btn-new">+ 新会话</button>
+      <button class="btn" id="btn-refresh">刷新</button>
+    </div>
+    <div id="session-list">
+      <div class="empty">正在加载会话…</div>
+    </div>
+  </aside>
+
+  <section id="chat">
+    <header>
+      <span id="status"></span>
+      <span class="title" id="current-title">Default</span>
+      <span class="session-id" id="current-sid">default</span>
+      <span class="spacer"></span>
+      <button class="btn sm" id="btn-rename">重命名</button>
+      <button class="btn sm" id="btn-clear">清空</button>
+    </header>
+
+    <div class="cmd-bar">
+      <span class="chip" data-cmd="/session.new">新会话</span>
+      <span class="chip" data-cmd="/session.list">列出所有会话</span>
+      <span class="chip" data-cmd="/session.clear">清空当前会话</span>
+      <span class="chip" data-cmd="/session.llm">切换LLM</span>
+      <span class="chip" data-cmd="/session.switch default">→ default</span>
+    </div>
+
+    <div id="messages">
+      <div class="empty">连接到 ws://<span id="host">localhost:8765</span> 后开始对话。<br/>可发送 <code>/session.new</code>、<code>/session.list</code>、<code>/session.switch &lt;id&gt;</code>。</div>
+    </div>
+
+    <div id="input">
+      <textarea id="query" placeholder="Enter 发送 · Shift+Enter 换行"></textarea>
+      <div class="right-col">
+        <button class="btn primary" id="btn-send" style="min-width: 60px;">发送</button>
+        <span class="hint" id="busy-hint">就绪</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host = location.host || 'localhost:8765';
+  const WS_URL = `${protocol}//${host}`;
+  document.getElementById('host').textContent = host;
+
+  let ws = null;
+  let currentSessionId = 'default';
+  const perSessionMessages = {};   // session_id -> [msgs]
+  let pendingBotMsg = null;        // 当前正在流式输出的 bot 消息
+  let busy = false;
+
+  const $ = (id) => document.getElementById(id);
+  const messagesEl = $('messages');
+  const sessionListEl = $('session-list');
+  const currentTitleEl = $('current-title');
+  const currentSidEl = $('current-sid');
+  const statusEl = $('status');
+  const queryEl = $('query');
+  const busyHint = $('busy-hint');
+
+  function setBusy(v) {
+    busy = v;
+    busyHint.textContent = v ? '处理中…' : '就绪';
+    $('btn-send').disabled = v;
+  }
+
+  function renderCurrent() {
+    messagesEl.innerHTML = '';
+    const list = perSessionMessages[currentSessionId] || [];
+    if (list.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = `会话 ${currentSessionId} 暂无消息。输入问题开始吧。`;
+      messagesEl.appendChild(empty);
+      return;
+    }
+    for (const m of list) messagesEl.appendChild(buildMsgEl(m));
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function appendMsgToSession(m) {
+    if (!perSessionMessages[currentSessionId]) perSessionMessages[currentSessionId] = [];
+    perSessionMessages[currentSessionId].push(m);
+    if (messagesEl.querySelector('.empty')) messagesEl.innerHTML = '';
+    messagesEl.appendChild(buildMsgEl(m));
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function updateLastBotMsg(text, active) {
+    const children = messagesEl.querySelectorAll('.msg.bot');
+    const last = children[children.length - 1];
+    if (!last) {
+      appendMsgToSession({ kind: 'bot', text: text, session: currentSessionId });
+      return;
+    }
+    const textNode = last.querySelector('.text') || last;
+    if (textNode.classList && textNode.classList.contains('text')) textNode.textContent = text;
+    else last.textContent = text;
+    last.classList.toggle('active', !!active);
+  }
+
+  function buildMsgEl(m) {
+    const el = document.createElement('div');
+    if (m.kind === 'system') {
+      el.className = 'msg system';
+      el.textContent = m.text;
+      return el;
+    }
+    el.className = 'msg ' + (m.kind === 'user' ? 'user' : 'bot');
+    if (m.session) {
+      const lbl = document.createElement('div');
+      lbl.className = 'label';
+      lbl.textContent = (m.kind === 'user' ? '👤 user @ ' : '🤖 agent @ ') + m.session;
+      el.appendChild(lbl);
+    }
+    const body = document.createElement('div');
+    body.className = 'text';
+    body.textContent = m.text;
+    el.appendChild(body);
+    return el;
+  }
+
+  function renderSessionList(sessions, currentId) {
+    sessionListEl.innerHTML = '';
+    if (!sessions || sessions.length === 0) {
+      const e = document.createElement('div');
+      e.className = 'empty';
+      e.textContent = '还没有会话';
+      sessionListEl.appendChild(e);
+      return;
+    }
+    // 按 last_used_at 倒序
+    sessions = sessions.slice().sort((a, b) => (b.last_used_at || 0) - (a.last_used_at || 0));
+    for (const s of sessions) {
+      const el = document.createElement('div');
+      el.className = 'session-item' + (s.session_id === currentId ? ' active' : '');
+      const title = document.createElement('div');
+      title.className = 'title';
+      title.textContent = s.title || '(未命名会话)';
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const left = document.createElement('span');
+      const tag = document.createElement('span');
+      tag.className = 'tag ' + (s.running ? '' : 'idle');
+      tag.textContent = s.running ? '运行' : '空闲';
+      left.appendChild(tag);
+      const turns = document.createTextNode('  ' + (s.turns || 0) + ' turns');
+      left.appendChild(turns);
+      const right = document.createElement('span');
+      right.textContent = s.session_id;
+      right.style.fontFamily = 'monospace';
+      right.style.fontSize = '10px';
+      right.style.color = '#8b93a7';
+      meta.appendChild(left);
+      meta.appendChild(right);
+      if (s.session_id !== 'default') {
+        const del = document.createElement('span');
+        del.className = 'del';
+        del.textContent = ' ✕';
+        del.title = '删除此会话';
+        del.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          if (!confirm(`删除会话 ${s.session_id}?`)) return;
+          send({ type: 'cmd', action: 'delete_session', session_id: s.session_id });
+        });
+        meta.appendChild(del);
+      }
+      el.appendChild(title);
+      el.appendChild(meta);
+      el.addEventListener('click', () => switchSession(s.session_id));
+      sessionListEl.appendChild(el);
+    }
+  }
+
+  function updateHeader(sid, title) {
+    currentSessionId = sid;
+    currentSidEl.textContent = sid;
+    currentTitleEl.textContent = title || sid;
+  }
+
+  function switchSession(sid) {
+    updateHeader(sid);
+    renderCurrent();
+    // 让服务端也知道这切换（可选）
+    send({ type: 'cmd', action: 'switch_session', session_id: sid });
+  }
+
+  function connect() {
+    statusEl.classList.remove('on');
+    try { ws.close(); } catch(e) {}
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+      statusEl.classList.add('on');
+      appendMsgToSession({ kind: 'system', text: '[已连接] ' + WS_URL });
+      // 请求会话列表
+      send({ type: 'cmd', action: 'list_sessions' });
+    };
+    ws.onclose = () => {
+      statusEl.classList.remove('on');
+      appendMsgToSession({ kind: 'system', text: '[连接已断开] 3 秒后自动重连…' });
+      setTimeout(connect, 3000);
+    };
+    ws.onerror = (ev) => {
+      appendMsgToSession({ kind: 'system', text: '[WebSocket 错误]' });
+    };
+    ws.onmessage = (ev) => {
+      let data;
+      try { data = JSON.parse(ev.data); }
+      catch (e) { appendMsgToSession({ kind: 'system', text: '[非 JSON 消息] ' + ev.data }); return; }
+
+      const sid = data.session_id || currentSessionId;
+
+      // 如果消息里包含 new_session_id / sessions 等信息，更新 UI
+      if (data.new_session_id) switchSession(data.new_session_id);
+      if (data.current_session_id) updateHeader(data.current_session_id, data.current_session_id);
+      if (Array.isArray(data.sessions)) renderSessionList(data.sessions, sid);
+
+      if (data.type === 'pong') return;
+
+      if (data.type === 'error') {
+        appendMsgToSession({ kind: 'system', text: '[错误] ' + data.message });
+        setBusy(false);
+        return;
+      }
+
+      // 如果这条消息属于另一个会话，只记录但不渲染到当前视图
+      const belongsHere = sid === currentSessionId;
+      if (!belongsHere && !Array.isArray(data.sessions)) {
+        // 忽略不属于当前会话的流式消息；system 消息只保留到本会话
+        if (data.type === 'chunk' || data.type === 'done') return;
+      }
+
+      if (data.type === 'chunk') {
+        if (!pendingBotMsg) {
+          appendMsgToSession({ kind: 'bot', text: data.text, session: sid, _streaming: true });
+          pendingBotMsg = { text: data.text, session: sid };
+        } else {
+          pendingBotMsg.text += data.text;
+          updateLastBotMsg(pendingBotMsg.text, true);
+        }
+        return;
+      }
+
+      if (data.type === 'done') {
+        if (pendingBotMsg && pendingBotMsg.session === sid) {
+          pendingBotMsg = null;
+          updateLastBotMsg(data.text, false);
+        } else {
+          appendMsgToSession({ kind: 'bot', text: data.text, session: sid });
+        }
+        setBusy(false);
+        return;
+      }
+
+      if (data.type === 'system') {
+        if (Array.isArray(data.sessions)) return;  // 纯会话列表
+        appendMsgToSession({ kind: 'system', text: data.text, session: sid });
+        return;
+      }
+    };
+  }
+
+  function send(obj) {
+    if (!ws || ws.readyState !== 1) {
+      appendMsgToSession({ kind: 'system', text: '[尚未连接] 请等待连接…' });
+      return;
+    }
+    ws.send(JSON.stringify(obj));
+  }
+
+  function sendQuery(q) {
+    if (busy) return;
+    q = (q || '').trim();
+    if (!q) return;
+    appendMsgToSession({ kind: 'user', text: q, session: currentSessionId });
+    queryEl.value = '';
+    pendingBotMsg = null;
+    setBusy(true);
+    send({ type: 'chat', session_id: currentSessionId, query: q });
+  }
+
+  // 事件绑定
+  $('btn-send').addEventListener('click', () => sendQuery(queryEl.value));
+  queryEl.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' && !ev.shiftKey) {
+      ev.preventDefault();
+      sendQuery(queryEl.value);
+    }
+  });
+  $('btn-new').addEventListener('click', () => {
+    const title = prompt('新会话标题（可留空）：', '');
+    send({ type: 'cmd', action: 'new_session', title: (title || '').trim() });
+  });
+  $('btn-refresh').addEventListener('click', () => send({ type: 'cmd', action: 'list_sessions' }));
+  $('btn-clear').addEventListener('click', () => {
+    if (!confirm('确认清空当前会话的消息历史与记忆？（将发送 /session.clear）')) return;
+    sendQuery('/session.clear');
+  });
+  $('btn-rename').addEventListener('click', () => {
+    const t = prompt('新标题：', currentSessionId);
+    if (t && t.trim()) send({ type: 'cmd', action: 'rename_session', session_id: currentSessionId, title: t.trim() });
+  });
+  document.querySelectorAll('.cmd-bar .chip').forEach((c) => {
+    c.addEventListener('click', () => {
+      const cmd = c.getAttribute('data-cmd');
+      if (cmd.startsWith('/session.new')) {
+        const title = prompt('新会话标题（可留空）：', '');
+        send({ type: 'cmd', action: 'new_session', title: (title || '').trim() });
+      } else if (cmd.startsWith('/session.switch ')) {
+        const target = cmd.split(' ').slice(-1)[0];
+        switchSession(target);
+      } else {
+        sendQuery(cmd);
+      }
+    });
+  });
+
+  connect();
+})();
+</script>
+</body>
+</html>
