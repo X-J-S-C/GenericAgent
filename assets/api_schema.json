@@ -1,0 +1,201 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GenericAgent API Schema",
+  "version": "0.1.0",
+  "description": "统一的前后端通信 JSON 数据格式",
+
+  "definitions": {
+
+    "Role": {
+      "type": "string",
+      "enum": ["user", "agent", "system", "tool"]
+    },
+
+    "Message": {
+      "type": "object",
+      "required": ["id", "role", "content", "timestamp"],
+      "properties": {
+        "id":         {"type": "string",  "description": "消息唯一 ID (UUID前8位)"},
+        "role":       {"$ref": "#/definitions/Role"},
+        "content":    {"type": "string",  "description": "消息正文 (Markdown)"},
+        "timestamp":  {"type": "number",  "description": "Unix 时间戳 (秒)"}
+      }
+    },
+
+    "ToolArg": {
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "ToolCall": {
+      "type": "object",
+      "required": ["id", "name", "args"],
+      "properties": {
+        "id":    {"type": "string", "description": "工具调用 ID (与 LLM response.tool_calls[].id 对应)"},
+        "name":  {"type": "string", "description": "工具名，如 code_run / read_file / ask_user"},
+        "args":  {"$ref": "#/definitions/ToolArg"},
+        "result": {"type": ["string", "null"], "description": "工具执行结果 (完成后填入)"}
+      }
+    },
+
+    "WsClientMessage": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["subscribe", "abort", "ping"]
+        },
+        "task_id": {"type": "string", "description": "subscribe 时可选，路径参数已提供"}
+      }
+    },
+
+    "WsServerMessage": {
+      "type": "object",
+      "required": ["type"],
+      "discriminator": {
+        "propertyName": "type",
+        "mapping": {
+          "subscribed": "#/definitions/WsSubscribed",
+          "next":       "#/definitions/WsNext",
+          "tool_start": "#/definitions/WsToolStart",
+          "tool_end":   "#/definitions/WsToolEnd",
+          "done":       "#/definitions/WsDone",
+          "error":      "#/definitions/WsError",
+          "pong":       "#/definitions/WsPong"
+        }
+      },
+      "properties": {
+        "type": {"type": "string"}
+      }
+    },
+
+    "WsSubscribed": {
+      "allOf": [
+        {"required": ["type", "task_id"]},
+        {"properties": {
+          "type":    {"const": "subscribed"},
+          "task_id": {"type": "string"},
+          "status":  {"type": "string", "default": "running"}
+        }}
+      ]
+    },
+
+    "WsNext": {
+      "allOf": [
+        {"required": ["type", "content"]},
+        {"properties": {
+          "type":    {"const": "next"},
+          "content": {"type": "string", "description": "增量文本 (Markdown)"},
+          "source":  {"type": "string", "enum": ["user", "agent", "system"], "default": "agent"},
+          "msg_id":  {"type": "string", "description": "消息 ID (可选)"}
+        }}
+      ]
+    },
+
+    "WsToolStart": {
+      "allOf": [
+        {"required": ["type", "tool_call"]},
+        {"properties": {
+          "type":      {"const": "tool_start"},
+          "tool_call": {"$ref": "#/definitions/ToolCall"}
+        }}
+      ]
+    },
+
+    "WsToolEnd": {
+      "allOf": [
+        {"required": ["type", "tool_call"]},
+        {"properties": {
+          "type":      {"const": "tool_end"},
+          "tool_call": {"$ref": "#/definitions/ToolCall"},
+          "success":   {"type": "boolean"},
+          "duration_ms": {"type": "number"}
+        }}
+      ]
+    },
+
+    "WsDone": {
+      "allOf": [
+        {"required": ["type", "content"]},
+        {"properties": {
+          "type":      {"const": "done"},
+          "content":   {"type": "string"},
+          "source":    {"type": "string", "default": "agent"},
+          "tool_calls": {"type": "array", "items": {"$ref": "#/definitions/ToolCall"}},
+          "exit_reason": {"type": "string", "description": "如 EXITED / CURRENT_TASK_DONE / MAX_TURNS_EXCEEDED"}
+        }}
+      ]
+    },
+
+    "WsError": {
+      "allOf": [
+        {"required": ["type", "message"]},
+        {"properties": {
+          "type":    {"const": "error"},
+          "message": {"type": "string"},
+          "code":    {"type": "string"}
+        }}
+      ]
+    },
+
+    "WsPong": {
+      "allOf": [
+        {"required": ["type"]},
+        {"properties": {
+          "type": {"const": "pong"}
+        }}
+      ]
+    },
+
+    "AgentStatus": {
+      "type": "object",
+      "properties": {
+        "is_running":   {"type": "boolean"},
+        "llm_no":      {"type": "integer"},
+        "llm_name":    {"type": "string"},
+        "history_len": {"type": "integer"},
+        "current_task": {"type": ["string", "null"]}
+      }
+    },
+
+    "LLMInfo": {
+      "type": "object",
+      "properties": {
+        "index":  {"type": "integer"},
+        "name":   {"type": "string"},
+        "active": {"type": "boolean"}
+      }
+    },
+
+    "SessionInfo": {
+      "type": "object",
+      "properties": {
+        "id":        {"type": "string"},
+        "title":     {"type": "string"},
+        "created_at":{"type": "number"},
+        "updated_at":{"type": "number"},
+        "msg_count": {"type": "integer"}
+      }
+    },
+
+    "ChatRequest": {
+      "type": "object",
+      "required": ["message"],
+      "properties": {
+        "message": {"type": "string"},
+        "source":  {"type": "string", "default": "user"},
+        "images":  {"type": "array", "items": {"type": "string"}, "default": []}
+      }
+    },
+
+    "ChatResponse": {
+      "type": "object",
+      "properties": {
+        "task_id": {"type": "string"},
+        "status":  {"type": "string", "enum": ["queued", "running"]}
+      }
+    }
+
+  }
+}

@@ -1,6 +1,7 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "created_at": "2026-06-15",
+  "updated_at": "2026-06-15",
   "milestones": {
     "M1": {"name": "基础 API 打通", "priority": "high", "status": "in_progress"},
     "M2": {"name": "多 Agent UI", "priority": "high", "status": "pending"},
@@ -14,7 +15,7 @@
     "06": {"name": "设置/配置读写 API", "milestone": "M3", "status": "pending"},
     "07": {"name": "文件 API（浏览/读/写/上传）", "milestone": "M3", "status": "pending"},
     "08": {"name": "proto_ui 数据驱动化", "milestone": "M1", "status": "pending"},
-    "09": {"name": "统一 JSON 数据格式（message/tool_call/session）", "milestone": "M1", "status": "pending"},
+    "09": {"name": "统一 JSON 数据格式（message/tool_call/session）", "milestone": "M1", "status": "done", "file": "assets/api_schema.json", "deps": ["02"]},
     "10": {"name": "前端数据驱动化（mock → 真实 API）", "milestone": "M1", "status": "pending"},
     "11": {"name": "聊天视图动态渲染", "milestone": "M1", "status": "pending"},
     "12": {"name": "输入框增强（文件拖拽 + 代码高亮）", "milestone": "M2", "status": "pending"},
@@ -28,13 +29,13 @@
     "20": {"name": "错误处理与空状态", "milestone": "M3", "status": "pending"},
     "21": {"name": "前端工程化脚本", "milestone": "M2", "status": "pending"},
     "22": {"name": "前端 Store（状态管理）", "milestone": "M2", "status": "pending"},
-    "23": {"name": "统一 Python 启动脚本", "milestone": "M1", "status": "pending"},
+    "23": {"name": "统一 Python 启动脚本", "milestone": "M1", "status": "done", "file": "start.py"},
     "24": {"name": "README & 启动说明", "milestone": "M3", "status": "pending"},
     "25": {"name": "端到端测试", "milestone": "M1", "status": "pending"}
   },
   "api_routes": {
     "GET /": "服务健康检查",
-    "GET /api/status": "获取 Agent 运行状态（is_running, llm_no, llm_name）",
+    "GET /api/status": "Agent 状态（is_running, llm_no, llm_name, current_task_id）",
     "GET /api/llms": "列出所有可用 LLM",
     "POST /api/llm/switch": "切换 LLM（body: {index: int}）",
     "POST /api/abort": "中止当前任务",
@@ -42,15 +43,33 @@
     "WS /ws/{task_id}": "WebSocket 流式接收任务响应"
   },
   "websocket_protocol": {
-    "client_send": {"subscribe": "开始订阅", "abort": "中止任务", "ping": "心跳"},
-    "server_send": {"next": "增量输出", "done": "最终响应", "error": "错误", "subscribed": "订阅确认"}
+    "client_send": {
+      "subscribe": "开始订阅（首个消息）",
+      "abort": "中止任务",
+      "ping": "心跳"
+    },
+    "server_send": {
+      "subscribed": "订阅确认",
+      "next": "增量文本输出 {content, source}",
+      "tool_start": "工具调用开始 {tool_call: {id, name, args}}",
+      "tool_end": "工具调用结束 {tool_call: {...}, success}",
+      "done": "最终响应 {content, source, tool_calls?}",
+      "error": "错误 {message, code?}",
+      "pong": "心跳响应"
+    }
   },
   "dependencies": {
     "fastapi": ">=0.115",
     "uvicorn": ">=0.30"
   },
-  "start_command": "uvicorn api_server:app --host 0.0.0.0 --port 18792 --reload",
+  "start_commands": {
+    "api_only": "uvicorn api_server:app --host 0.0.0.0 --port 18792 --reload",
+    "unified": "python start.py",
+    "unified_with_bots": "python start.py --tg --feishu --pet"
+  },
   "files": {
-    "api_server.py": "FastAPI 后端主文件（任务 02 完成）"
+    "api_server.py": "FastAPI 后端主文件（任务 02, 03, 05 完成）",
+    "assets/api_schema.json": "统一 JSON 数据格式 Schema（任务 09 完成）",
+    "start.py": "统一 Python 启动脚本（任务 23 完成）"
   }
 }
