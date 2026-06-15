@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GenericAgent · UI Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ───────── Sidebar (codex-style) ───────── -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">⬢</div>
+      <div class="brand-name">GenericAgent</div>
+    </div>
+
+    <button class="new-task">
+      <span class="icon">+</span> 新建任务
+    </button>
+
+    <nav class="nav">
+      <button class="nav-item active" data-view="dashboard">
+        <span class="nav-ico">◇</span>仪表盘
+      </button>
+      <button class="nav-item" data-view="chat">
+        <span class="nav-ico">◇</span>对话
+      </button>
+      <button class="nav-item" data-view="memory">
+        <span class="nav-ico">◇</span>记忆
+      </button>
+      <button class="nav-item" data-view="skills">
+        <span class="nav-ico">◇</span>技能
+      </button>
+    </nav>
+
+    <div class="sessions">
+      <div class="sessions-label">今天</div>
+      <div class="session active" data-view="chat">
+        <div class="session-title">监控股票并提醒我</div>
+        <div class="session-meta">12 轮 · 8.4K tok</div>
+      </div>
+      <div class="session" data-view="chat">
+        <div class="session-title">读一下我微信消息</div>
+        <div class="session-meta">5 轮 · 1.2K tok</div>
+      </div>
+      <div class="session" data-view="chat">
+        <div class="session-title">打开淘宝搜索 iPhone 16</div>
+        <div class="session-meta">8 轮 · 3.6K tok</div>
+      </div>
+      <div class="sessions-label">昨天</div>
+      <div class="session" data-view="chat-done">
+        <div class="session-title">用 Gmail 发送月度报表</div>
+        <div class="session-meta">23 轮 · 14K tok</div>
+      </div>
+      <div class="session" data-view="chat-done">
+        <div class="session-title">整理会议纪要发到飞书</div>
+        <div class="session-meta">11 轮 · 6.7K tok</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="llm-row">
+        <div class="llm-name">Claude-Sonnet-4</div>
+        <div class="llm-switch">切换</div>
+      </div>
+      <div class="token-row">
+        <div class="token-label">上下文</div>
+        <div class="token-bar"><span style="width: 44%"></span></div>
+        <div class="token-val">12.3K / 28K</div>
+      </div>
+      <div class="footer-actions">
+        <button title="强制停止"><span>⏹</span></button>
+        <button title="自主行动"><span>🟢</span></button>
+        <button title="桌面宠物"><span>🐱</span></button>
+        <button title="设置"><span>⚙</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ───────── Main ───────── -->
+  <main class="main">
+    <!-- View: Dashboard -->
+    <section class="view view-dashboard active" data-view="dashboard">
+      <header class="view-header">
+        <div class="greeting">
+          <h1>下午好，lsdefine</h1>
+          <p class="subtle">GenericAgent 准备就绪 · 当前在线 1 个会话 · 4 个 Skill 可用</p>
+        </div>
+        <div class="header-meta">
+          <div class="status-pill ok"><span class="dot"></span>代理在线</div>
+          <div class="status-pill idle"><span class="dot"></span>浏览器未连接</div>
+        </div>
+      </header>
+
+      <section class="quick-actions">
+        <h2 class="section-label">试一试</h2>
+        <div class="action-grid">
+          <button class="action-card" data-goto="chat">
+            <div class="action-icon">📈</div>
+            <div class="action-title">量化选股</div>
+            <div class="action-desc">GEM 股票 EXPMA 金叉、换手率 &gt; 5%</div>
+          </button>
+          <button class="action-card" data-goto="chat">
+            <div class="action-icon">💬</div>
+            <div class="action-title">读微信消息</div>
+            <div class="action-desc">扫描近 24h 未读并生成摘要</div>
+          </button>
+          <button class="action-card" data-goto="chat">
+            <div class="action-icon">🧋</div>
+            <div class="action-title">点杯奶茶</div>
+            <div class="action-desc">用美团 App 完成下单</div>
+          </button>
+          <button class="action-card" data-goto="chat">
+            <div class="action-icon">📨</div>
+            <div class="action-title">Gmail 发文件</div>
+            <div class="action-desc">把桌面 PDF 发到指定收件人</div>
+          </button>
+        </div>
+      </section>
+
+      <section class="recent">
+        <div class="recent-head">
+          <h2 class="section-label">最近任务</h2>
+          <a class="link-mute">查看全部 →</a>
+        </div>
+        <ul class="task-list">
+          <li class="task-row" data-goto="chat">
+            <span class="status-icon ok">✓</span>
+            <div class="task-main">
+              <div class="task-title">用 Gmail 发送月度报表</div>
+              <div class="task-meta">23 轮 · 14.0K tokens · 2 分钟前</div>
+            </div>
+            <div class="task-time">昨天 21:14</div>
+          </li>
+          <li class="task-row" data-goto="chat-done">
+            <span class="status-icon ok">✓</span>
+            <div class="task-main">
+              <div class="task-title">整理会议纪要发到飞书</div>
+              <div class="task-meta">11 轮 · 6.7K tokens · 1 小时前</div>
+            </div>
+            <div class="task-time">昨天 19:32</div>
+          </li>
+          <li class="task-row" data-goto="chat-done">
+            <span class="status-icon warn">!</span>
+            <div class="task-main">
+              <div class="task-title">查找近 3 个月超 ¥2K 支出</div>
+              <div class="task-meta">8 轮 · 4.1K tokens · 需用户确认</div>
+            </div>
+            <div class="task-time">昨天 17:08</div>
+          </li>
+          <li class="task-row" data-goto="chat-done">
+            <span class="status-icon ok">✓</span>
+            <div class="task-main">
+              <div class="task-title">用 rapidocr 配置 OCR 能力</div>
+              <div class="task-meta">6 轮 · 2.9K tokens · 已写入 L3 记忆</div>
+            </div>
+            <div class="task-time">前天 22:45</div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="skill-snap">
+        <h2 class="section-label">技能树概览</h2>
+        <div class="skill-grid">
+          <div class="skill-tile">
+            <div class="skill-name">web_setup_sop</div>
+            <div class="skill-info">解锁 Web 工具 · 32 次调用</div>
+          </div>
+          <div class="skill-tile">
+            <div class="skill-name">ocr_utils</div>
+            <div class="skill-info">rapidocr · 18 次调用</div>
+          </div>
+          <div class="skill-tile">
+            <div class="skill-name">adb_ui</div>
+            <div class="skill-info">移动端控制 · 7 次调用</div>
+          </div>
+          <div class="skill-tile">
+            <div class="skill-name">mootdx_stock</div>
+            <div class="skill-info">量化选股 · 4 次调用</div>
+          </div>
+          <div class="skill-tile add">
+            <div class="skill-name">+</div>
+            <div class="skill-info">让 Agent 学习新技能</div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- View: Chat in progress -->
+    <section class="view view-chat" data-view="chat">
+      <header class="task-header">
+        <div class="task-titles">
+          <h1>监控股票并提醒我</h1>
+          <div class="task-meta-row">
+            <span class="badge running"><span class="dot pulse"></span>运行中 · 第 7 轮</span>
+            <span class="meta-sep">·</span>
+            <span class="meta">12.3K tokens</span>
+            <span class="meta-sep">·</span>
+            <span class="meta">12.4s</span>
+            <span class="meta-sep">·</span>
+            <span class="meta">Claude-Sonnet-4</span>
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="ghost-btn">⏹ 停止</button>
+          <button class="ghost-btn">⋯</button>
+        </div>
+      </header>
+
+      <div class="messages">
+        <!-- user message -->
+        <div class="msg user">
+          <div class="msg-bubble">监控股票并提醒我，发现 EXPMA 金叉、换手率 &gt; 5% 的 GEM 股票推送到飞书</div>
+          <div class="msg-time">14:23:18</div>
+        </div>
+
+        <!-- assistant message: turn 1 -->
+        <div class="msg assistant">
+          <div class="turn">
+            <div class="turn-summary">
+              <span class="turn-no">Turn 1</span>
+              安装 mootdx 包、配置选股流程
+            </div>
+
+            <div class="tool-card success">
+              <div class="tool-head">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">pip install mootdx</span>
+                <span class="tool-duration">3.2s</span>
+                <span class="status-dot ok"></span>
+              </div>
+              <details class="tool-body">
+                <summary>stdout · 5 行</summary>
+                <pre>Collecting mootdx
+  Downloading mootdx-1.2.5-py3-none-any.whl (78 kB)
+Installing collected packages: mootdx
+Successfully installed mootdx-1.2.5</pre>
+              </details>
+            </div>
+
+            <div class="tool-card success">
+              <div class="tool-head">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">检测飞书 webhook 配置</span>
+                <span class="tool-duration">0.6s</span>
+                <span class="status-dot ok"></span>
+              </div>
+              <details class="tool-body">
+                <summary>stdout · 3 行</summary>
+                <pre>FEISHU_WEBHOOK=ok
+FEISHU_WEBHOOK_SECRET=ok</pre>
+              </details>
+            </div>
+
+            <div class="text-reply">
+              选股环境已就绪。下面我开始构建选股脚本。
+            </div>
+          </div>
+        </div>
+
+        <!-- assistant message: turn 2 -->
+        <div class="msg assistant">
+          <div class="turn">
+            <div class="turn-summary">
+              <span class="turn-no">Turn 2</span>
+              编写选股逻辑并跑通
+            </div>
+
+            <div class="tool-card success">
+              <div class="tool-head">
+                <span class="tool-ico">📝</span>
+                <span class="tool-name">file_write</span>
+                <span class="tool-args-pre">./skills/mootdx_stock/screen.py · 84 行</span>
+                <span class="tool-duration">0.1s</span>
+                <span class="status-dot ok"></span>
+              </div>
+            </div>
+
+            <div class="tool-card failed">
+              <div class="tool-head">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">python screen.py</span>
+                <span class="tool-duration">0.4s</span>
+                <span class="status-dot err"></span>
+              </div>
+              <details class="tool-body" open>
+                <summary>stderr · 1 行 · 退出码 1</summary>
+                <pre class="err">ModuleNotFoundError: No module named 'pandas'
+  File "screen.py", line 4, in &lt;module&gt;
+    import pandas as pd</pre>
+              </details>
+            </div>
+
+            <div class="text-reply">
+              缺 pandas。补一下依赖再继续。
+            </div>
+          </div>
+        </div>
+
+        <!-- assistant message: turn 3 (running) -->
+        <div class="msg assistant">
+          <div class="turn">
+            <div class="turn-summary">
+              <span class="turn-no">Turn 3</span>
+              重新拉取数据并筛股
+            </div>
+
+            <div class="tool-card success">
+              <div class="tool-head">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">pip install pandas</span>
+                <span class="tool-duration">5.8s</span>
+                <span class="status-dot ok"></span>
+              </div>
+            </div>
+
+            <div class="tool-card running">
+              <div class="tool-head">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">python screen.py --market gem</span>
+                <span class="tool-duration"><span class="pulse-dot"></span>执行中</span>
+                <span class="status-dot running"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- composer -->
+      <div class="composer-wrap">
+        <div class="composer">
+          <textarea
+            rows="1"
+            placeholder="any task?  / 试试 /new 开新任务"
+          ></textarea>
+          <div class="composer-tools">
+            <button title="附件">📎</button>
+            <button title="截图">🖼</button>
+            <button class="send">⏎</button>
+          </div>
+        </div>
+        <div class="composer-hint">
+          GenericAgent 可执行任意代码、控制浏览器、读写文件。<kbd>/</kbd> 唤起命令
+        </div>
+      </div>
+    </section>
+
+    <!-- View: Chat done -->
+    <section class="view view-chat-done" data-view="chat-done">
+      <header class="task-header">
+        <div class="task-titles">
+          <h1>用 Gmail 发送月度报表</h1>
+          <div class="task-meta-row">
+            <span class="badge done"><span class="dot"></span>已完成</span>
+            <span class="meta-sep">·</span>
+            <span class="meta">23 轮</span>
+            <span class="meta-sep">·</span>
+            <span class="meta">14.0K tokens</span>
+            <span class="meta-sep">·</span>
+            <span class="meta">耗时 38s</span>
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="ghost-btn">↻ 重新执行</button>
+          <button class="ghost-btn">⋯</button>
+        </div>
+      </header>
+
+      <div class="messages">
+        <div class="msg user">
+          <div class="msg-bubble">把桌面 PDF 月度报表通过 Gmail 发给 boss@company.com</div>
+          <div class="msg-time">昨天 21:14:02</div>
+        </div>
+
+        <div class="msg assistant">
+          <div class="turn">
+            <div class="turn-summary">
+              <span class="turn-no">Turn 1</span>
+              配置 OAuth、定位文件
+            </div>
+            <div class="tool-card success">
+              <div class="tool-head">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">python -c "import os; print(os.listdir(os.path.expanduser('~/Desktop')))"</span>
+                <span class="tool-duration">0.1s</span>
+                <span class="status-dot ok"></span>
+              </div>
+            </div>
+            <div class="tool-card success">
+              <div class="tool-head">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">curl -s localhost:8085/oauth/refresh</span>
+                <span class="tool-duration">0.4s</span>
+                <span class="status-dot ok"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="msg assistant">
+          <div class="turn">
+            <div class="turn-summary">
+              <span class="turn-no">Turn 2</span>
+              组装邮件、发送
+            </div>
+            <div class="tool-card success">
+              <div class="tool-head">
+                <span class="tool-ico">📝</span>
+                <span class="tool-name">file_write</span>
+                <span class="tool-args-pre">send_gmail.py · 36 行</span>
+                <span class="tool-duration">0.1s</span>
+                <span class="status-dot ok"></span>
+              </div>
+            </div>
+            <div class="tool-card success">
+              <div class="tool-head">
+                <span class="tool-ico">⚡</span>
+                <span class="tool-name">code_run</span>
+                <span class="tool-args-pre">python send_gmail.py</span>
+                <span class="tool-duration">2.7s</span>
+                <span class="status-dot ok"></span>
+              </div>
+            </div>
+            <div class="text-reply">
+              ✉️ 邮件已成功发送至 <b>boss@company.com</b>，主题「9 月度报表」，附件 Desktop/September_Report.pdf (2.1 MB)。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="composer-wrap">
+        <div class="composer">
+          <textarea
+            rows="1"
+            placeholder="继续和 Agent 对话..."
+          ></textarea>
+          <div class="composer-tools">
+            <button title="附件">📎</button>
+            <button class="send">⏎</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- View: Memory (placeholder) -->
+    <section class="view view-memory" data-view="memory">
+      <header class="view-header">
+        <h1>分层记忆</h1>
+        <p class="subtle">L0 元规则 · L1 索引 · L2 全局事实 · L3 Skills · L4 会话归档</p>
+      </header>
+      <div class="memory-grid">
+        <div class="mem-card"><div class="mem-tag">L2</div><div class="mem-title">飞书 webhook 已配置</div><div class="mem-meta">由 fsapp.py 引导写入</div></div>
+        <div class="mem-card"><div class="mem-tag">L2</div><div class="mem-title">浏览器插件已安装</div><div class="mem-meta">tmwd_cdp_bridge v0.3</div></div>
+        <div class="mem-card"><div class="mem-tag">L3</div><div class="mem-title">web_setup_sop</div><div class="mem-meta">解锁 web_scan / web_execute_js</div></div>
+        <div class="mem-card"><div class="mem-tag">L3</div><div class="mem-title">mootdx_stock</div><div class="mem-meta">量化选股流程</div></div>
+      </div>
+    </section>
+
+    <!-- View: Skills (placeholder) -->
+    <section class="view view-skills" data-view="skills">
+      <header class="view-header">
+        <h1>技能树</h1>
+        <p class="subtle">由 Agent 在使用中自动生长 · 5 个活跃技能</p>
+      </header>
+      <div class="skill-grid">
+        <div class="skill-tile"><div class="skill-name">web_setup_sop</div><div class="skill-info">32 次</div></div>
+        <div class="skill-tile"><div class="skill-name">ocr_utils</div><div class="skill-info">18 次</div></div>
+        <div class="skill-tile"><div class="skill-name">adb_ui</div><div class="skill-info">7 次</div></div>
+        <div class="skill-tile"><div class="skill-name">mootdx_stock</div><div class="skill-info">4 次</div></div>
+        <div class="skill-tile add"><div class="skill-name">+</div><div class="skill-info">让 Agent 学习新技能</div></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
