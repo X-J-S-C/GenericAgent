@@ -1,0 +1,317 @@
+{
+  "project": "GenericAgent Web UI",
+  "version": "0.1.0",
+  "created_at": "2026-06-15",
+  "description": "GenericAgent 多 Agent 管理面板 - 适配前端 Web UI",
+  "backend": {
+    "type": "FastAPI",
+    "entry": "web_ui/app.py",
+    "port": 8765,
+    "entry_script": "web_ui/start.py"
+  },
+  "frontend": {
+    "type": "原生 JavaScript (Vanilla JS)",
+    "dir": "proto_ui",
+    "build_script": "web_ui/start.py (内置静态服务)"
+  },
+  "modules": {
+    "core_engine": {
+      "path": "agent_loop.py",
+      "description": "Agent 核心循环 + BaseHandler/agent_runner_loop"
+    },
+    "handler": {
+      "path": "ga.py",
+      "description": "GenericAgentHandler - code_run/文件/记忆等工具实现"
+    },
+    "llm_client": {
+      "path": "agentmain.py",
+      "description": "GeneraticAgent - 多 LLM session 管理，队列和多实例"
+    },
+    "llm_core": {
+      "path": "llmcore.py",
+      "description": "LLM client - 各种 LLM 封装 (Claude/OA/原生等"
+    },
+    "memory_system": {
+      "path": "memory/",
+      "description": "L0-L4 分层记忆 (元规则/索引/全局/技能/归档"
+    },
+    "skills": {
+      "path": "memory/ 下的各个 .py 和 .md",
+      "description": "Skill 目录"
+    },
+    "bots": {
+      "path": "frontends/",
+      "description": "fsapp/wechatapp/qqapp/tgapp/dingtalk/stapp/qtapp 等"
+    },
+    "desktop_pet": {
+      "path": "frontends/desktop_pet.pyw",
+      "description": "桌面宠物"
+    }
+  },
+  "dependencies": {
+    "python": [
+      "fastapi",
+      "uvicorn[standard]",
+      "websockets"
+    ],
+    "existing": [
+      "lark-oapi (飞书)",
+      "PIL/Pillow (图像处理)",
+      "requests (HTTP)",
+      "标准库 (subprocess/threading/queue/json/re/os/sys/tempfile",
+      "标准库 datetime/pathlib/importlib/traceback",
+      "importlib 动态导入"
+    ]
+  },
+  "data_formats": {
+    "session": {
+      "id": "string",
+      "title": "string",
+      "created_at": "ISO8601",
+      "updated_at": "ISO8601",
+      "turns": "number",
+      "token_count": "number",
+      "status": "running|done|stopped|error"
+    },
+    "message": {
+      "id": "string",
+      "role": "user|assistant|system|tool",
+      "content": "string",
+      "ts": "ISO8601"
+    },
+    "tool_call": {
+      "id": "string",
+      "name": "string",
+      "args": "object",
+      "status": "running|done|error",
+      "result": "any"
+    }
+  },
+  "api_routes": {
+    "GET": [
+      "/api/status",
+      "/api/sessions",
+      "/api/sessions/{id}",
+      "/api/llm/models",
+      "/api/settings",
+      "/api/skills",
+      "/api/memory/layers",
+      "/api/memory/layer/{level}",
+      "/api/files/browse?path=",
+      "/api/conductor/status",
+      "/api/hive/status",
+      "/api/morphling/capabilities"
+    ],
+    "POST": [
+      "/api/chat/send",
+      "/api/chat/stop",
+      "/api/sessions/new",
+      "/api/sessions/{id}/restore",
+      "/api/llm/switch?index=",
+      "/api/files/read",
+      "/api/files/write",
+      "/api/files/upload",
+      "/api/settings/update",
+      "/api/conductor/start",
+      "/api/hive/start",
+      "/api/hive/post",
+      "/api/morphling/import"
+    ],
+    "WS": [
+      "/ws/chat/{session_id}"
+    ]
+  },
+  "todo": {
+    "tasks": [
+      {
+        "id": "01",
+        "name": "后端 API 层：FastAPI 基础框架",
+        "description": "HTTP 路由 + WebSocket 实时通信",
+        "status": "pending",
+        "priority": "high"
+      },
+      {
+        "id": "02",
+        "name": "核心 Agent 接口",
+        "description": "发送消息、停止、状态查询",
+        "status": "pending",
+        "priority": "high"
+      },
+      {
+        "id": "03",
+        "name": "会话管理 API",
+        "description": "列出、恢复、删除会话",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "04",
+        "name": "LLM 模型切换 API",
+        "description": "模型列表与切换",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "05",
+        "name": "多 Agent 接口",
+        "description": "指挥家、蜂巢、变形者",
+        "status": "pending",
+        "priority": "high"
+      },
+      {
+        "id": "06",
+        "name": "设置/配置读写 API",
+        "description": "持久化到配置文件",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "07",
+        "name": "文件 API",
+        "description": "读取、上传、浏览目录",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "08",
+        "name": "前端数据驱动化",
+        "description": "proto_ui 从 mock → 真实 API",
+        "status": "pending",
+        "priority": "high"
+      },
+      {
+        "id": "09",
+        "name": "聊天视图动态渲染",
+        "description": "用户消息/Agent回复/工具卡片/代码流",
+        "status": "pending",
+        "priority": "high"
+      },
+      {
+        "id": "10",
+        "name": "消息输入增强",
+        "description": "文件拖拽上传、代码块高亮",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "11",
+        "name": "指挥家视图",
+        "description": "子 Agent 卡片、执行进度、编排日志",
+        "status": "pending",
+        "priority": "high"
+      },
+      {
+        "id": "12",
+        "name": "蜂巢视图",
+        "description": "公告板流、Worker 状态",
+        "status": "pending",
+        "priority": "high"
+      },
+      {
+        "id": "13",
+        "name": "变形者视图",
+        "description": "能力包、导入进度",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "14",
+        "name": "设置面板功能化",
+        "description": "模型切换、路径、Bot 管理",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "15",
+        "name": "记忆管理视图",
+        "description": "L0-L4 分层展示和编辑",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "16",
+        "name": "桌面宠物组件",
+        "description": "可拖拽、皮肤切换、自主行为",
+        "status": "pending",
+        "priority": "low"
+      },
+      {
+        "id": "17",
+        "name": "WebSocket 状态 UI",
+        "description": "连接状态、重连",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "18",
+        "name": "错误处理与空状态",
+        "description": "API 失败提示、无会话提示",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "19",
+        "name": "前端工程化",
+        "description": "package.json、dev/prod 脚本",
+        "status": "pending",
+        "priority": "high"
+      },
+      {
+        "id": "20",
+        "name": "前端状态管理 Store",
+        "description": "session、messages、config",
+        "status": "pending",
+        "priority": "high"
+      },
+      {
+        "id": "21",
+        "name": "统一启动脚本",
+        "description": "Python 一键启动后端+前端",
+        "status": "pending",
+        "priority": "high"
+      },
+      {
+        "id": "22",
+        "name": "README + 启动说明",
+        "description": "依赖安装、使用步骤",
+        "status": "pending",
+        "priority": "medium"
+      },
+      {
+        "id": "23",
+        "name": "端到端测试",
+        "description": "发送消息 → 工具调用 → 展示结果",
+        "status": "pending",
+        "priority": "high"
+      }
+    ],
+    "milestones": [
+      {
+        "name": "M1: 基础 API 打通",
+        "description": "完成基础 API + 简单聊天（1-4 任务）",
+        "status": "pending"
+      },
+      {
+        "name": "M2: 多 Agent UI",
+        "description": "指挥家+蜂巢+变形者（5-8，11-13，20-23）",
+        "status": "pending"
+      },
+      {
+        "name": "M3: 设置与高级",
+        "description": "设置、记忆、宠物、文件（6-7，14-19）",
+        "status": "pending"
+      }
+    ]
+  },
+  "notes": [
+    "proto_ui 已完成 UI 原型设计：温暖陶土色设计系统",
+    "现有 frontends/ 下各 Bot 实现（fsapp.py/wechatapp.py 等可参考交互模式",
+    "agentmain.py 的 GeneraticAgent 是核心实例管理对象",
+    "agent_loop.py 的 agent_runner_loop 是主循环（yield流式输出",
+    "ga.py 的 GenericAgentHandler 是具体工具处理逻辑",
+    "桌面宠物和自主模式：frontends/desktop_pet.pyw 可参考",
+    "现有桌面端使用了 frontends/stapp.py 作为 Streamlit UI 实现",
+    "记忆系统：memory/ 下分层存储在 L0-L4",
+    "工具 schema 定义：assets/tools_schema.json"
+  ]
+}
