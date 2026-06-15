@@ -1,0 +1,22 @@
+# GenericAgent Dockerfile - Simple version
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV GA_LANG=zh
+
+WORKDIR /app
+
+# Install dependencies
+COPY pyproject.toml ./
+RUN pip install --no-cache-dir requests beautifulsoup4 bottle simple-websocket-server && \
+    pip install --no-cache-dir streamlit>=1.28
+
+# Copy application
+COPY . .
+
+# Default port 8501 for Streamlit
+EXPOSE 8501 8765
+
+# Run Streamlit UI by default
+CMD ["streamlit", "run", "frontends/stapp.py", "--server.port", "8501", "--server.address", "0.0.0.0"]

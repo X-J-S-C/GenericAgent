@@ -1,0 +1,51 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Python
+__pycache__
+*.py[cod]
+*.so
+.Python
+*.egg-info
+.eggs
+dist
+build
+
+# Virtual environments
+venv
+.venv
+env
+
+# Temp files
+temp/
+*.log
+*.tmp
+
+# Memory (should be mounted, not baked in)
+memory/*.txt
+memory/*.json
+
+# Assets cache
+assets/images/*
+assets/demo/*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+LICENSE
+
+# Frontends (optional, for smaller image)
+frontends/skins/
+frontends/*.png
+frontends/*.gif

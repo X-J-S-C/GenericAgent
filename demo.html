@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenericAgent Demo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        h1 { text-align: center; color: #00d4ff; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; font-size: 14px; }
+        .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: #16213e; border-radius: 8px; margin-bottom: 20px; }
+        .status { display: flex; align-items: center; gap: 8px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #666; }
+        .status-dot.connected { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
+        .status-dot.disconnected { background: #ff4444; }
+        .chat-container { flex: 1; background: #16213e; border-radius: 12px; padding: 20px; overflow-y: auto; max-height: 60vh; margin-bottom: 20px; }
+        .message { margin-bottom: 15px; padding: 12px 16px; border-radius: 12px; max-width: 85%; }
+        .message.user { background: #0f3460; margin-left: auto; border-bottom-right-radius: 4px; }
+        .message.agent { background: #1a1a2e; border: 1px solid #333; margin-right: auto; border-bottom-left-radius: 4px; }
+        .message .role { font-size: 11px; color: #888; margin-bottom: 4px; }
+        .message .content { line-height: 1.5; white-space: pre-wrap; }
+        .message.error { background: #3d1a1a; border: 1px solid #ff4444; }
+        .input-area { display: flex; gap: 10px; }
+        #queryInput { flex: 1; padding: 14px 18px; border: 2px solid #333; border-radius: 25px; background: #0f3460; color: #fff; font-size: 15px; outline: none; transition: border-color 0.2s; }
+        #queryInput:focus { border-color: #00d4ff; }
+        #queryInput::placeholder { color: #666; }
+        button { padding: 12px 28px; background: linear-gradient(135deg, #00d4ff, #0099cc); border: none; border-radius: 25px; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; }
+        button:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4); }
+        button:active { transform: translateY(0); }
+        button:disabled { background: #333; cursor: not-allowed; transform: none; box-shadow: none; }
+        .config-section { background: #16213e; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        .config-section h3 { color: #00d4ff; margin-bottom: 10px; font-size: 14px; }
+        .config-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #333; }
+        .config-item:last-child { border-bottom: none; }
+        .config-label { color: #888; }
+        .config-value { color: #fff; font-family: monospace; }
+        .thinking { color: #888; font-style: italic; font-size: 13px; }
+        .thinking::before { content: '🤔 '; }
+        .timestamp { font-size: 10px; color: #555; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 GenericAgent Demo</h1>
+        <p class="subtitle">End-to-end dialogue verification</p>
+
+        <div class="status-bar">
+            <div class="status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+            <div class="config">
+                <span style="color:#888">LLM:</span>
+                <span id="llmName" style="color:#00d4ff">DeepSeek</span>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>⚙️ Configuration</h3>
+            <div class="config-item">
+                <span class="config-label">API Provider</span>
+                <span class="config-value" id="apiProvider">DeepSeek</span>
+            </div>
+            <div class="config-item">
+                <span class="config-label">Model</span>
+                <span class="config-value" id="modelName">deepseek-chat</span>
+            </div>
+            <div class="config-item">
+                <span class="config-label">Endpoint</span>
+                <span class="config-value" id="endpoint">api.deepseek.com/v1</span>
+            </div>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="message agent">
+                <div class="role">Agent</div>
+                <div class="content">Hello! I'm GenericAgent, your AI assistant. How can I help you today?</div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="queryInput" placeholder="Type your message..." autocomplete="off">
+            <button id="sendBtn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            wsEndpoint: `ws://${window.location.hostname || 'localhost'}:8765/ws/demo-session`,
+            apiEndpoint: '/api/query',
+            llmName: 'DeepSeek',
+            modelName: 'deepseek-chat'
+        };
+
+        // State
+        let ws = null;
+        let messageHistory = [];
+
+        // DOM Elements
+        const chatContainer = document.getElementById('chatContainer');
+        const queryInput = document.getElementById('queryInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        // Update config display
+        document.getElementById('apiProvider').textContent = CONFIG.llmName;
+        document.getElementById('modelName').textContent = CONFIG.modelName;
+        document.getElementById('llmName').textContent = CONFIG.llmName;
+
+        // WebSocket connection
+        function connect() {
+            return new Promise((resolve, reject) => {
+                try {
+                    ws = new WebSocket(CONFIG.wsEndpoint);
+
+                    ws.onopen = () => {
+                        statusDot.className = 'status-dot connected';
+                        statusText.textContent = 'Connected';
+                        resolve();
+                    };
+
+                    ws.onclose = () => {
+                        statusDot.className = 'status-dot disconnected';
+                        statusText.textContent = 'Disconnected';
+                    };
+
+                    ws.onerror = (err) => {
+                        console.log('WebSocket error (agent may not be running):', err);
+                        // Don't reject - demo works in "offline" mode
+                        resolve();
+                    };
+
+                    ws.onmessage = (event) => {
+                        try {
+                            const msg = JSON.parse(event.data);
+                            handleMessage(msg);
+                        } catch (e) {
+                            console.error('Failed to parse message:', e);
+                        }
+                    };
+                } catch (err) {
+                    console.log('WebSocket not available, running in demo mode');
+                    resolve();
+                }
+            });
+        }
+
+        // Handle incoming messages
+        function handleMessage(msg) {
+            const { type, content } = msg;
+
+            if (type === 'ping') {
+                ws.send(JSON.stringify({ type: 'pong' }));
+                return;
+            }
+
+            if (type === 'connected') {
+                addMessage('system', 'Connected to server');
+                return;
+            }
+
+            if (type === 'error') {
+                addMessage('error', content);
+                return;
+            }
+
+            if (type === 'response' || type === 'done') {
+                addMessage('agent', content);
+            }
+        }
+
+        // Add message to chat
+        function addMessage(role, content, isError = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}${isError ? ' error' : ''}`;
+
+            const roleLabel = role === 'user' ? 'You' : (role === 'system' ? 'System' : (role === 'error' ? 'Error' : 'Agent'));
+            const time = new Date().toLocaleTimeString();
+
+            msgDiv.innerHTML = `
+                <div class="role">${roleLabel}</div>
+                <div class="content">${escapeHtml(content)}</div>
+                <div class="timestamp">${time}</div>
+            `;
+
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            messageHistory.push({ role, content, time });
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Send message
+        async function sendMessage() {
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            queryInput.value = '';
+            addMessage('user', query);
+
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Thinking...';
+
+            // If WebSocket is connected, send via WS
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                try {
+                    ws.send(JSON.stringify({
+                        type: 'query',
+                        content: query,
+                        timestamp: Date.now()
+                    }));
+                } catch (err) {
+                    addMessage('error', 'Failed to send message: ' + err.message);
+                }
+            } else {
+                // Demo mode: simulate response
+                await simulateResponse(query);
+            }
+
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send';
+        }
+
+        // Simulate agent response for demo
+        async function simulateResponse(query) {
+            const lowerQuery = query.toLowerCase();
+
+            // Simulate typing delay
+            await new Promise(r => setTimeout(r, 800 + Math.random() * 800));
+
+            let response = '';
+
+            if (lowerQuery.includes('hello') || lowerQuery.includes('hi')) {
+                response = 'Hello! Nice to meet you. I am GenericAgent, an AI assistant powered by DeepSeek. I can help you with various tasks including coding, file operations, web browsing, and more. What would you like to do?';
+            } else if (lowerQuery.includes('help')) {
+                response = 'I can help you with:\n\n• **Coding**: Write, read, and debug code\n• **Files**: Read, write, and modify files\n• **Web**: Browse websites and execute JavaScript\n• **Memory**: Manage persistent memory and context\n• **Planning**: Break down complex tasks into steps\n\nJust tell me what you need!';
+            } else if (lowerQuery.includes('time')) {
+                response = `The current time is ${new Date().toLocaleString()}.`;
+            } else if (lowerQuery.includes('who') || lowerQuery.includes('what')) {
+                response = 'I am GenericAgent, an autonomous AI agent framework. I use Large Language Models (like DeepSeek) to understand and execute tasks. I have various tools available to interact with files, code, web browsers, and more.';
+            } else {
+                response = `I received your message: "${query}"\n\nThis is a demo response. In a real session with the agent running, I would process this query using the configured LLM (DeepSeek) and execute any necessary tools.\n\nTo test the full functionality, please ensure:\n1. The GenericAgent server is running\n2. The WebSocket connection is established\n3. The mykey.py configuration is correct`;
+            }
+
+            addMessage('agent', response);
+        }
+
+        // Handle Enter key
+        queryInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Initial connection
+        connect();
+
+        // Periodic ping to keep connection alive
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'ping' }));
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

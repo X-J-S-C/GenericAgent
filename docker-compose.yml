@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # GenericAgent with Streamlit UI
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    ports:
+      - "8501:8501"
+    environment:
+      - GA_LANG=zh
+    volumes:
+      # Mount mykey.py if it exists
+      - ./mykey.py:/app/mykey.py:ro
+      # Persist temp files
+      - agent_data:/app/temp
+      - agent_memory:/app/memory
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - agent-network
+
+  # WebSocket server (optional)
+  ws-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    ports:
+      - "8765:8765"
+    command: ["python", "ws_server.py"]
+    environment:
+      - GA_LANG=zh
+    volumes:
+      - ./mykey.py:/app/mykey.py:ro
+    networks:
+      - agent-network
+
+volumes:
+  agent_data:
+  agent_memory:
+
+networks:
+  agent-network:
+    driver: bridge
