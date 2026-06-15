@@ -1,0 +1,53 @@
+{
+  "project": "GenericAgent",
+  "version": "0.1.0",
+  "last_updated": "2026-06-15",
+  "task_02_backend_fastapi": {
+    "status": "completed",
+    "file": "api_server.py",
+    "start_command": "uvicorn api_server:app --host 0.0.0.0 --port 18792 --reload",
+    "api_routes": [
+      {"method": "GET",  "path": "/",                       "description": "Health check"},
+      {"method": "GET",  "path": "/api/status",            "description": "Agent status (is_running, llm_no, llm_name)"},
+      {"method": "GET",  "path": "/api/llms",               "description": "List all available LLMs"},
+      {"method": "POST", "path": "/api/llm/switch",         "description": "Switch LLM by index (body: {index})"},
+      {"method": "POST", "path": "/api/abort",              "description": "Abort current running task"},
+      {"method": "POST", "path": "/api/chat",               "description": "Send message, returns {task_id}"},
+      {"method": "WS",   "path": "/ws/{task_id}",          "description": "WebSocket streaming for task responses"}
+    ],
+    "websocket_protocol": {
+      "client_send": [
+        {"type": "subscribe", "description": "Start receiving queued messages"},
+        {"type": "abort",     "description": "Abort the running task"},
+        {"type": "ping",      "description": "Keep-alive ping"}
+      ],
+      "server_send": [
+        {"type": "next",   "fields": ["content", "source"], "description": "Streaming chunk"},
+        {"type": "done",   "fields": ["content", "source"], "description": "Task complete"},
+        {"type": "error",  "fields": ["message"],           "description": "Error occurred"},
+        {"type": "abort_ack", "description": "Abort acknowledged"},
+        {"type": "pong",   "description": "pong response to ping"}
+      ]
+    },
+    "design_notes": [
+      "GeneriAgent runs in a daemon thread started via lifespan context manager",
+      "HTTP POST /api/chat returns task_id; frontend WS connects to /ws/{task_id}",
+      "asyncio.Queue bridges Python threading.Queue → WebSocket",
+      "In-memory task registry maps task_id → asyncio.Queue"
+    ]
+  },
+  "m1_milestone_progress": {
+    "task_02": {"status": "completed",   "note": "Backend FastAPI foundation"},
+    "task_03": {"status": "completed",     "note": "Core agent interface (GeneriAgent class)"},
+    "task_05": {"status": "completed",     "note": "LLM switching (list_llms, next_llm)"},
+    "task_09": {"status": "pending",       "note": "Unified JSON data format"},
+    "task_10": {"status": "pending",       "note": "Frontend data-driven architecture"},
+    "task_11": {"status": "pending",       "note": "Chat view dynamic rendering"},
+    "task_23": {"status": "pending",       "note": "Unified Python startup script"},
+    "task_25": {"status": "pending",       "note": "End-to-end integration test"}
+  },
+  "next_entry_points": [
+    "Task 09 - Unified JSON data format",
+    "Task 23 - Unified Python startup script"
+  ]
+}
