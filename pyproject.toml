@@ -13,6 +13,9 @@ dependencies = [
     "beautifulsoup4>=4.12",
     "bottle>=0.12",
     "simple-websocket-server>=0.4",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "pydantic>=2.0",
 ]
 
 [project.optional-dependencies]

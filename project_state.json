@@ -1,0 +1,43 @@
+{
+  "last_task": "02_backend_fastapi",
+  "completed": ["02", "03", "05"],
+  "next_entry": "09_unified_json_format | 23_unified_launch_script",
+  "api_server": {
+    "start_cmd": "uvicorn api_server:app --host 0.0.0.0 --port 18792 --reload",
+    "routes": {
+      "GET /": "Health check",
+      "GET /api/status": "Agent status (is_running, llm_no, llm_name)",
+      "GET /api/llms": "List all LLM configurations",
+      "POST /api/llm/switch": "Switch LLM by index {index}",
+      "POST /api/abort": "Abort current task",
+      "POST /api/chat": "Send message, returns {task_id}",
+      "WS /ws/{task_id}": "Stream task responses"
+    },
+    "ws_protocol": {
+      "client_send": {
+        "subscribe": "Start receiving stream",
+        "abort": "Abort current task",
+        "ping": "Keepalive"
+      },
+      "server_send": {
+        "next": "Partial response chunk {content, source}",
+        "done": "Final response {content, source}",
+        "error": "Error message {content}",
+        "abort_ack": "Abort acknowledged",
+        "subscribed": "Subscription confirmed"
+      }
+    },
+    "key_design": [
+      "GeneraticAgent runs as singleton in daemon thread",
+      "HTTP POST /api/chat returns task_id immediately",
+      "Frontend connects WS /ws/{task_id} to receive stream",
+      "asyncio.Queue bridges threading.Queue -> WebSocket"
+    ]
+  },
+  "files": {
+    "api_server.py": "FastAPI backend (~230 lines)",
+    "agentmain.py": "GeneraticAgent core class",
+    "agent_loop.py": "agent_runner_loop generator"
+  },
+  "dependencies_added": ["fastapi>=0.115", "uvicorn>=0.30", "pydantic>=2.0"]
+}
