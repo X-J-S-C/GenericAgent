@@ -107,44 +107,33 @@ def _build_ws_msg(msg_type: str, **fields):
 
 async def _register_task(task_id: str, display_queue: queue.Queue, source: str = "user"):
     """Bridge GeneraticAgent threading.Queue → asyncio.Queue with structured parsing."""
-    out_q = asyncio.Queue()
+    loop = asyncio.get_event_loop()      # <-- 必须在协程中捕获，不能在子线程里 get_event_loop
+    out_q: asyncio.Queue = asyncio.Queue()
     _task_queues[task_id] = out_q
-    _task_meta[task_id] = {
-        "source": source,
-        "created_at": time.time(),
-        "task_id": task_id,
-    }
+    _task_meta[task_id] = {"source": source, "created_at": time.time(), "task_id": task_id}
     with _agent_lock:
         _current_task_id[0] = task_id
 
-    pending_tool = None   # {"name", "args", "started"}
-    buffer = ""           # accumulate chunk text to detect tool boundaries
+    def _put(obj):
+        loop.call_soon_threadsafe(out_q.put_nowait, obj)
+
+    pending_tool = None
 
     def bridge():
-        nonlocal pending_tool, buffer
+        nonlocal pending_tool
         while True:
             try:
                 item = display_queue.get(timeout=120)
             except queue.Empty:
-                asyncio.get_event_loop().call_soon_threadsafe(
-                    lambda: out_q.put_nowait(_build_ws_msg("error", message="timeout"))
-                )
+                _put(_build_ws_msg("error", message="timeout waiting for agent response"))
                 break
 
             if item is None:
-                # End of stream
                 if pending_tool:
-                    asyncio.get_event_loop().call_soon_threadsafe(
-                        lambda: out_q.put_nowait(_build_ws_msg(
-                            "tool_end",
-                            tool_call={"id": "", "name": pending_tool["name"],
-                                       "args": pending_tool["args"], "result": None},
-                            success=False,
-                        ))
-                    )
-                asyncio.get_event_loop().call_soon_threadsafe(
-                    lambda: out_q.put_nowait(None)
-                )
+                    _put(_build_ws_msg("tool_end", tool_call={
+                        "name": pending_tool["name"], "args": pending_tool["args"], "result": None},
+                        success=False))
+                _put(None)
                 break
 
             if isinstance(item, dict):
@@ -157,76 +146,43 @@ async def _register_task(task_id: str, display_queue: queue.Queue, source: str =
             if not content:
                 continue
 
-            # ---- parse tool_start / tool_end from text ----
+            # parse tool_start
             tool_calls = _parse_tool_calls_from_chunk(content)
-
             for tc in tool_calls:
-                # Close any pending tool first
                 if pending_tool:
-                    asyncio.get_event_loop().call_soon_threadsafe(
-                        lambda: out_q.put_nowait(_build_ws_msg(
-                            "tool_end",
-                            tool_call={"id": "", "name": pending_tool["name"],
-                                       "args": pending_tool["args"], "result": None},
-                            success=True,
-                        ))
-                    )
-                # Start new tool
+                    _put(_build_ws_msg("tool_end", tool_call={
+                        "name": pending_tool["name"], "args": pending_tool["args"], "result": None},
+                        success=True))
                 pending_tool = {"name": tc["name"], "args": tc["args"]}
-                asyncio.get_event_loop().call_soon_threadsafe(
-                    lambda: out_q.put_nowait(_build_ws_msg(
-                        "tool_start",
-                        tool_call={"id": str(uuid.uuid4())[:8],
-                                   "name": tc["name"], "args": tc["args"]},
-                    ))
-                )
+                _put(_build_ws_msg("tool_start", tool_call={
+                    "id": str(uuid.uuid4())[:8], "name": tc["name"], "args": tc["args"]}))
 
-            # If we see the end marker and have a pending tool, close it
+            # if end-marker and pending tool, close it
             if _TOOL_END_RE.search(content) and pending_tool:
                 ended = pending_tool
                 pending_tool = None
-                asyncio.get_event_loop().call_soon_threadsafe(
-                    lambda: out_q.put_nowait(_build_ws_msg(
-                        "tool_end",
-                        tool_call={"id": "", "name": ended["name"],
-                                   "args": ended["args"], "result": None},
-                        success=True,
-                    ))
-                )
+                _put(_build_ws_msg("tool_end", tool_call={
+                    "name": ended["name"], "args": ended["args"], "result": None},
+                    success=True))
 
-            # Forward text as "next" (strip tool块，只留纯文本)
+            # forward text
             clean = _TOOL_START_RE.sub("", content)
             clean = _TOOL_END_RE.sub("", clean)
-            clean = _TOOL_CODE_BLOCK_RE.sub("", clean)
-            clean = clean.strip()
+            clean = _TOOL_CODE_BLOCK_RE.sub("", clean).strip()
             if clean:
-                asyncio.get_event_loop().call_soon_threadsafe(
-                    lambda c=clean, s=(item.get("source") if isinstance(item, dict) else "agent"): out_q.put_nowait(
-                        _build_ws_msg("next", content=c, source=s)
-                    )
-                )
+                src = item.get("source", "agent") if isinstance(item, dict) else "agent"
+                _put(_build_ws_msg("next", content=clean, source=src))
 
-            # Final done
+            # final done
             if isinstance(item, dict) and item.get("done") is not None:
-                # Close any open tool
                 if pending_tool:
-                    asyncio.get_event_loop().call_soon_threadsafe(
-                        lambda: out_q.put_nowait(_build_ws_msg(
-                            "tool_end",
-                            tool_call={"id": "", "name": pending_tool["name"],
-                                       "args": pending_tool["args"], "result": None},
-                            success=True,
-                        ))
-                    )
+                    _put(_build_ws_msg("tool_end", tool_call={
+                        "name": pending_tool["name"], "args": pending_tool["args"], "result": None},
+                        success=True))
                 done_content = _TOOL_START_RE.sub("", item["done"])
                 done_content = _TOOL_CODE_BLOCK_RE.sub("", done_content).strip()
-                asyncio.get_event_loop().call_soon_threadsafe(
-                    lambda: out_q.put_nowait(_build_ws_msg(
-                        "done",
-                        content=done_content,
-                        source=item.get("source", "agent"),
-                    ))
-                )
+                _put(_build_ws_msg("done", content=done_content,
+                    source=item.get("source", "agent")))
                 with _agent_lock:
                     _current_task_id.pop(0, None)
                 _running_tasks.pop(task_id, None)
