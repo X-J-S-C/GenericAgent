@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenericAgent 第三方界面全面对比</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-card-hover: #222230;
+            --border-color: #2a2a3a;
+            --text-primary: #f0f0f5;
+            --text-secondary: #8888a0;
+            --text-muted: #555566;
+            --accent-1: #6366f1;
+            --accent-2: #8b5cf6;
+            --accent-3: #ec4899;
+            --accent-4: #14b8a6;
+            --accent-5: #f59e0b;
+            --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --gradient-2: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+            --gradient-3: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
+            --gradient-4: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            --gradient-5: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .header-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--gradient-1);
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 50px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-1);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 32px;
+            background: var(--gradient-1);
+            border-radius: 2px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
+        }
+
+        .repo-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .repo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--card-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .repo-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--card-accent);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .repo-card:hover::before {
+            opacity: 1;
+        }
+
+        .repo-card:nth-child(1) { --card-accent: #6366f1; --card-gradient: var(--gradient-1); }
+        .repo-card:nth-child(2) { --card-accent: #ec4899; --card-gradient: var(--gradient-2); }
+        .repo-card:nth-child(3) { --card-accent: #14b8a6; --card-gradient: var(--gradient-3); }
+        .repo-card:nth-child(4) { --card-accent: #f59e0b; --card-gradient: var(--gradient-4); }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .repo-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .repo-author {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .repo-author a {
+            color: var(--card-accent);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .repo-author a:hover {
+            opacity: 0.8;
+        }
+
+        .stars-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .card-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+        }
+
+        .card-stat {
+            text-align: center;
+        }
+
+        .card-stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--card-accent);
+        }
+
+        .card-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .meta-tag {
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .card-features {
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .features-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .feature-tag {
+            padding: 4px 10px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: #a5b4fc;
+        }
+
+        .comparison-section {
+            margin-bottom: 80px;
+        }
+
+        .comparison-table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table th {
+            background: rgba(0, 0, 0, 0.3);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: sticky;
+            top: 0;
+        }
+
+        .comparison-table th:first-child {
+            color: var(--text-primary);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:hover td {
+            background: rgba(99, 102, 241, 0.03);
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+            color: var(--text-primary);
+            width: 200px;
+        }
+
+        .check-icon {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .cross-icon {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .partial-icon {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        .timeline-section {
+            margin-bottom: 80px;
+        }
+
+        .timeline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .timeline-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+        }
+
+        .timeline-card::before {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 60px;
+            bottom: -24px;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-card:last-child::before {
+            display: none;
+        }
+
+        .timeline-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .timeline-version {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .timeline-version a {
+            color: var(--accent-1);
+            text-decoration: none;
+        }
+
+        .timeline-version a:hover {
+            text-decoration: underline;
+        }
+
+        .timeline-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .architecture-section {
+            margin-bottom: 80px;
+        }
+
+        .arch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .arch-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 28px;
+        }
+
+        .arch-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .arch-title .icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .arch-list {
+            list-style: none;
+        }
+
+        .arch-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .arch-list li:last-child {
+            border-bottom: none;
+        }
+
+        .arch-list li::before {
+            content: '▸';
+            color: var(--accent-1);
+            font-weight: bold;
+        }
+
+        .verdict-section {
+            margin-bottom: 80px;
+        }
+
+        .verdict-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .verdict-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 28px;
+        }
+
+        .verdict-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .verdict-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .verdict-score {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .score-star {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: var(--border-color);
+        }
+
+        .score-star.filled {
+            background: var(--accent-1);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 60px 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--accent-1);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .github-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .github-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .github-link:hover {
+            color: var(--text-primary);
+        }
+
+        .github-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .stats-bar {
+                gap: 30px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="container">
+        <header class="header">
+            <div class="header-badge">第三方界面对比分析</div>
+            <h1>GenericAgent 五大第三方界面</h1>
+            <p class="subtitle">全面对比 dhdbv-cbs/genericagent-launcher、chilishark27/ga-manager、wangjc683/galley、Fwind43/GenericAgent-Admin 的功能特性、架构设计与更新动态</p>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value">202</div>
+                    <div class="stat-label">总 Stars</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">27</div>
+                    <div class="stat-label">总 Forks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">项目数量</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">2026-06</div>
+                    <div class="stat-label">最新更新</div>
+                </div>
+            </div>
+        </header>
+
+        <section>
+            <h2 class="section-title">项目概览</h2>
+            <div class="cards-grid">
+                <div class="repo-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="repo-name">genericagent-launcher</div>
+                            <div class="repo-author">by <a href="https://github.com/dhdbv-cbs">dhdbv-cbs</a></div>
+                        </div>
+                        <div class="stars-badge">⭐ 130</div>
+                    </div>
+                    <div class="card-stats">
+                        <div class="card-stat">
+                            <div class="card-stat-value">61</div>
+                            <div class="card-stat-label">Commits</div>
+                        </div>
+                        <div class="card-stat">
+                            <div class="card-stat-value">MIT</div>
+                            <div class="card-stat-label">License</div>
+                        </div>
+                        <div class="card-stat">
+                            <div class="card-stat-value">v0.1.9</div>
+                            <div class="card-stat-label">最新版本</div>
+                        </div>
+                    </div>
+                    <p class="card-description">面向 GenericAgent 的桌面启动器，把下载、配置、启动、聊天、渠道管理和远程设备接入整合到统一界面，支持 Windows 和 macOS。</p>
+                    <div class="card-meta">
+                        <span class="meta-tag">Python</span>
+                        <span class="meta-tag">Qt</span>
+                        <span class="meta-tag">Windows/macOS</span>
+                        <span class="meta-tag">2026-04</span>
+                    </div>
+                    <div class="card-features">
+                        <div class="features-title">核心能力</div>
+                        <div class="feature-list">
+                            <span class="feature-tag">渠道管理</span>
+                            <span class="feature-tag">远程设备</span>
+                            <span class="feature-tag">定时任务</span>
+                            <span class="feature-tag">VPS部署</span>
+                            <span class="feature-tag">托盘模式</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="repo-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="repo-name">ga-manager</div>
+                            <div class="repo-author">by <a href="https://github.com/chilishark27">chilishark27</a></div>
+                        </div>
+                        <div class="stars-badge">⭐ 23</div>
+                    </div>
+                    <div class="card-stats">
+                        <div class="card-stat">
+                            <div class="card-stat-value">200+</div>
+                            <div class="card-stat-label">Releases</div>
+                        </div>
+                        <div class="card-stat">
+                            <div class="card-stat-value">TypeScript</div>
+                            <div class="card-stat-label">语言</div>
+                        </div>
+                        <div class="card-stat">
+                            <div class="card-stat-value">v2.53.0</div>
+                            <div class="card-stat-label">最新版本</div>
+                        </div>
+                    </div>
+                    <p class="card-description">多实例 GenericAgent 管理面板，提供实时对话、多智能体编排(Hive/Conductor)、成本监控、技能树、桌面宠物等功能。</p>
+                    <div class="card-meta">
+                        <span class="meta-tag">Electron</span>
+                        <span class="meta-tag">TypeScript</span>
+                        <span class="meta-tag">Win/Mac/Linux</span>
+                        <span class="meta-tag">2026-05</span>
+                    </div>
+                    <div class="card-features">
+                        <div class="features-title">核心能力</div>
+                        <div class="feature-list">
+                            <span class="feature-tag">多实例管理</span>
+                            <span class="feature-tag">Desktop Pet</span>
+                            <span class="feature-tag">Rewind时光机</span>
+                            <span class="feature-tag">技能树</span>
+                            <span class="feature-tag">TODO Widget</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="repo-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="repo-name">galley</div>
+                            <div class="repo-author">by <a href="https://github.com/wangjc683">wangjc683</a></div>
+                        </div>
+                        <div class="stars-badge">⭐ 44</div>
+                    </div>
+                    <div class="card-stats">
+                        <div class="card-stat">
+                            <div class="card-stat-value">395</div>
+                            <div class="card-stat-label">Commits</div>
+                        </div>
+                        <div class="card-stat">
+                            <div class="card-stat-value">MIT</div>
+                            <div class="card-stat-label">License</div>
+                        </div>
+                        <div class="card-stat">
+                            <div class="card-stat-value">v0.2.8</div>
+                            <div class="card-stat-label">最新版本</div>
+                        </div>
+                    </div>
+                    <p class="card-description">开源本地 Agent 工作台，可并行运行多个 AI agent session，内置 GenericAgent runtime，支持 GUI/CLI 双入口和多 Agent 协作。</p>
+                    <div class="card-meta">
+                        <span class="meta-tag">Python</span>
+                        <span class="meta-tag">Go</span>
+                        <span class="meta-tag">Win/Mac/Linux</span>
+                        <span class="meta-tag">2026-05</span>
+                    </div>
+                    <div class="card-features">
+                        <div class="features-title">核心能力</div>
+                        <div class="feature-list">
+                            <span class="feature-tag">多Session并行</span>
+                            <span class="feature-tag">Goal工作流</span>
+                            <span class="feature-tag">CLI调度</span>
+                            <span class="feature-tag">内置Runtime</span>
+                            <span class="feature-tag">项目编排</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="repo-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="repo-name">GenericAgent-Admin</div>
+                            <div class="repo-author">by <a href="https://github.com/Fwind43">Fwind43</a></div>
+                        </div>
+                        <div class="stars-badge">⭐ 5</div>
+                    </div>
+                    <div class="card-stats">
+                        <div class="card-stat">
+                            <div class="card-stat-value">155</div>
+                            <div class="card-stat-label">Commits</div>
+                        </div>
+                        <div class="card-stat">
+                            <div class="card-stat-value">Go</div>
+                            <div class="card-stat-label">后端</div>
+                        </div>
+                        <div class="card-stat">
+                            <div class="card-stat-value">v0.1.0</div>
+                            <div class="card-stat-label">最新版本</div>
+                        </div>
+                    </div>
+                    <p class="card-description">GenericAgent 的桌面级管理面板，Go 后端负责进程/文件/配置/更新，React/Vite 前端提供控制台界面，可打包为单个 ga-admin 可执行文件。</p>
+                    <div class="card-meta">
+                        <span class="meta-tag">Go</span>
+                        <span class="meta-tag">React/Vite</span>
+                        <span class="meta-tag">Win/Mac/Linux</span>
+                        <span class="meta-tag">2026-05</span>
+                    </div>
+                    <div class="card-features">
+                        <div class="features-title">核心能力</div>
+                        <div class="feature-list">
+                            <span class="feature-tag">进程管理</span>
+                            <span class="feature-tag">文件编辑</span>
+                            <span class="feature-tag">模型配置</span>
+                            <span class="feature-tag">Goal/Hive</span>
+                            <span class="feature-tag">单文件分发</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="comparison-section">
+            <h2 class="section-title">功能对比矩阵</h2>
+            <div class="comparison-table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>功能维度</th>
+                            <th>Launcher</th>
+                            <th>GA Manager</th>
+                            <th>Galley</th>
+                            <th>Admin Go</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>聊天界面</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                        </tr>
+                        <tr>
+                            <td>多实例管理</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                            <td class="cross-icon">✗</td>
+                        </tr>
+                        <tr>
+                            <td>多渠道接入</td>
+                            <td class="check-icon">✓</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="cross-icon">✗</td>
+                        </tr>
+                        <tr>
+                            <td>远程设备/VPS</td>
+                            <td class="check-icon">✓</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="partial-icon">◐</td>
+                            <td class="cross-icon">✗</td>
+                        </tr>
+                        <tr>
+                            <td>定时任务</td>
+                            <td class="check-icon">✓</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="cross-icon">✗</td>
+                        </tr>
+                        <tr>
+                            <td>多Agent协作(Hive/Goal)</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                        </tr>
+                        <tr>
+                            <td>成本/Token监控</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="check-icon">✓</td>
+                            <td class="partial-icon">◐</td>
+                            <td class="partial-icon">◐</td>
+                        </tr>
+                        <tr>
+                            <td>内置Runtime</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="check-icon">✓</td>
+                            <td class="cross-icon">✗</td>
+                        </tr>
+                        <tr>
+                            <td>CLI入口</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="check-icon">✓</td>
+                            <td class="partial-icon">◐</td>
+                        </tr>
+                        <tr>
+                            <td>技能/SOP编辑</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="check-icon">✓</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="partial-icon">◐</td>
+                        </tr>
+                        <tr>
+                            <td>Desktop Pet</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="check-icon">✓</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="cross-icon">✗</td>
+                        </tr>
+                        <tr>
+                            <td>时光机(Rewind)</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="check-icon">✓</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="cross-icon">✗</td>
+                        </tr>
+                        <tr>
+                            <td>文件浏览器</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="cross-icon">✗</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                        </tr>
+                        <tr>
+                            <td>模型配置向导</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                        </tr>
+                        <tr>
+                            <td>自动更新</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                            <td class="check-icon">✓</td>
+                            <td class="cross-icon">✗</td>
+                        </tr>
+                        <tr>
+                            <td>跨平台打包</td>
+                            <td class="partial-icon">Win/Mac</td>
+                            <td class="check-icon">Win/Mac/Linux</td>
+                            <td class="check-icon">Win/Mac/Linux</td>
+                            <td class="check-icon">Win/Mac/Linux</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="architecture-section">
+            <h2 class="section-title">技术架构</h2>
+            <div class="arch-grid">
+                <div class="arch-card">
+                    <div class="arch-title">
+                        <span class="icon" style="background: rgba(99, 102, 241, 0.2);">🐍</span>
+                        genericagent-launcher
+                    </div>
+                    <ul class="arch-list">
+                        <li>Python + CustomTkinter (GUI)</li>
+                        <li>PyInstaller (打包)</li>
+                        <li>Inno Setup (Windows安装器)</li>
+                        <li>Ed25519 + SHA256 (签名验证)</li>
+                        <li>Qt/CustomTkinter 前端</li>
+                        <li>Bridge.py 桥接层</li>
+                        <li>外部更新器 + 自动回滚</li>
+                    </ul>
+                </div>
+                <div class="arch-card">
+                    <div class="arch-title">
+                        <span class="icon" style="background: rgba(236, 72, 153, 0.2);">🦈</span>
+                        ga-manager
+                    </div>
+                    <ul class="arch-list">
+                        <li>TypeScript + Electron</li>
+                        <li>React 前端</li>
+                        <li>Go backend (bridge)</li>
+                        <li>Python backend (GA通信)</li>
+                        <li>electron-builder (打包)</li>
+                        <li>electron-updater (自动更新)</li>
+                        <li>多窗口架构</li>
+                    </ul>
+                </div>
+                <div class="arch-card">
+                    <div class="arch-title">
+                        <span class="icon" style="background: rgba(20, 184, 166, 0.2);">🍽️</span>
+                        galley
+                    </div>
+                    <ul class="arch-list">
+                        <li>Python + Go (混合)</li>
+                        <li>内置 GenericAgent runtime</li>
+                        <li>bundled CPython 3.11</li>
+                        <li>GUI + CLI 双原生</li>
+                        <li>galley CLI 公开契约</li>
+                        <li>Browser Control 内置</li>
+                        <li>Project 多会话编排</li>
+                    </ul>
+                </div>
+                <div class="arch-card">
+                    <div class="arch-title">
+                        <span class="icon" style="background: rgba(245, 158, 11, 0.2);">⚙️</span>
+                        GenericAgent-Admin Go
+                    </div>
+                    <ul class="arch-list">
+                        <li>Go 后端 (进程/文件/配置)</li>
+                        <li>React/Vite 前端</li>
+                        <li>单文件分发 (ga-admin)</li>
+                        <li>复用 GA 官方 chat_worker</li>
+                        <li>Goal/Hive 官方逻辑</li>
+                        <li>外置 BBS 服务</li>
+                        <li>WebDriver 支持</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="timeline-section">
+            <h2 class="section-title">版本时间线</h2>
+            <div class="timeline-grid">
+                <div class="timeline-card">
+                    <div class="timeline-date">2026-06-03 (最后提交)</div>
+                    <div class="timeline-version"><a href="https://github.com/dhdbv-cbs/genericagent-launcher/releases/tag/v0.1.9">v0.1.9</a> (2026-04-25)</div>
+                    <div class="timeline-desc">修复重复定位逻辑、新增启动器内部更新、适配局域网接口、新建VPS一键部署。Windows安装包127MB，macOS/arm64/x86_64双架构支持。</div>
+                </div>
+                <div class="timeline-card">
+                    <div class="timeline-date">2026-06-06 (v2.53.0)</div>
+                    <div class="timeline-version"><a href="https://github.com/chilishark27/ga-manager/releases/tag/v2.53.0">v2.53.0</a></div>
+                    <div class="timeline-desc">新增 Hive/Morphling/Conductor 中显式 LLM 选择器。已有200+ releases，macOS arm64 DMG 634MB，x64 exe 588MB，AppImage 618MB。</div>
+                </div>
+                <div class="timeline-card">
+                    <div class="timeline-date">2026-06-12 (v0.2.8)</div>
+                    <div class="timeline-version"><a href="https://github.com/wangjc683/galley/releases/tag/v0.2.8">v0.2.8</a></div>
+                    <div class="timeline-desc">新增 Galley Goal V1 工作流，支持多Agent目标任务。主工作台细节收口，Settings/Browser Control 重构，内置 GA 升级到 0def7441。</div>
+                </div>
+                <div class="timeline-card">
+                    <div class="timeline-date">2026-06-16 (v0.1.0-fix1)</div>
+                    <div class="timeline-version"><a href="https://github.com/Fwind43/GenericAgent-Admin/releases/tag/v0.1.0-fix1">v0.1.0-fix1</a></div>
+                    <div class="timeline-desc">今日最新！修复聊天使用量芯片排版。正式版 v0.1.0 发布。单文件分发，Windows 12.4MB，Linux amd64 7.08MB，Darwin arm64 7MB。</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="verdict-section">
+            <h2 class="section-title">综合评价</h2>
+            <div class="verdict-grid">
+                <div class="verdict-card">
+                    <div class="verdict-title">🥇 genericagent-launcher</div>
+                    <div class="verdict-score">
+                        <div class="score-star filled"></div>
+                        <div class="score-star filled"></div>
+                        <div class="score-star filled"></div>
+                        <div class="score-star filled"></div>
+                        <div class="score-star"></div>
+                    </div>
+                    <div class="verdict-desc">Stars 最高 (130)，功能最全面。独有渠道管理（微信/Telegram/QQ/飞书等）、远程设备/VPS接入、定时任务面板。最适合需要完整生态的企业用户或重度用户。Windows优先，macOS支持稍弱。</div>
+                </div>
+                <div class="verdict-card">
+                    <div class="verdict-title">🥈 galley</div>
+                    <div class="verdict-score">
+                        <div class="score-star filled"></div>
+                        <div class="score-star filled"></div>
+                        <div class="score-star filled"></div>
+                        <div class="score-star filled"></div>
+                        <div class="score-star"></div>
+                    </div>
+                    <div class="verdict-desc">开源精神最佳 (395 commits, MIT)。内置Runtime + CLI入口，适合开发者和技术用户。多Session并行和Goal工作流是亮点。跨平台最完整。</div>
+                </div>
+                <div class="verdict-card">
+                    <div class="verdict-title">🥉 ga-manager</div>
+                    <div class="verdict-score">
+                        <div class="score-star filled"></div>
+                        <div class="score-star filled"></div>
+                        <div class="score-star filled"></div>
+                        <div class="score-star"></div>
+                        <div class="score-star"></div>
+                    </div>
+                    <div class="verdict-desc">最活跃的开发 (200+ releases)。Desktop Pet 和 Rewind 时光机等独特功能。多实例管理成熟。Electron + React 技术栈，跨平台体验一致。适合个人多任务用户。</div>
+                </div>
+                <div class="verdict-card">
+                    <div class="verdict-title">🏅 GenericAgent-Admin Go</div>
+                    <div class="verdict-score">
+                        <div class="score-star filled"></div>
+                        <div class="score-star filled"></div>
+                        <div class="score-star filled"></div>
+                        <div class="score-star"></div>
+                        <div class="score-star"></div>
+                    </div>
+                    <div class="verdict-desc">最新 (今日更新)，架构最独特 (Go后端 + React前端)。单文件分发最方便。适合需要轻量管理和系统集成的用户。目前Stars最少但发展迅速。</div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="section-title">选型建议</h2>
+            <div class="comparison-table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>使用场景</th>
+                            <th>推荐项目</th>
+                            <th>原因</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>企业/渠道用户</td>
+                            <td>genericagent-launcher</td>
+                            <td>唯一支持微信/Telegram/QQ/飞书/钉钉等全渠道接入</td>
+                        </tr>
+                        <tr>
+                            <td>多实例并行</td>
+                            <td>ga-manager / galley</td>
+                            <td>成熟的多Session管理和项目编排能力</td>
+                        </tr>
+                        <tr>
+                            <td>开箱即用</td>
+                            <td>galley</td>
+                            <td>内置Runtime + CPython，无需配置环境</td>
+                        </tr>
+                        <tr>
+                            <td>开发者/CLI用户</td>
+                            <td>galley</td>
+                            <td>galley CLI 公开契约，可被 Supervisor Agent 调度</td>
+                        </tr>
+                        <tr>
+                            <td>轻量单文件</td>
+                            <td>GenericAgent-Admin</td>
+                            <td>ga-admin 单文件，Windows仅12MB</td>
+                        </tr>
+                        <tr>
+                            <td>可爱/个性</td>
+                            <td>ga-manager</td>
+                            <td>Desktop Pet + Rewind 时光机等独特功能</td>
+                        </tr>
+                        <tr>
+                            <td>成本监控</td>
+                            <td>ga-manager</td>
+                            <td>详细的 Token 成本跟踪和系统资源监控</td>
+                        </tr>
+                        <tr>
+                            <td>最新技术</td>
+                            <td>GenericAgent-Admin</td>
+                            <td>Go + React/Vite 现代化架构，今日最新更新</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>数据来源：GitHub API | 更新时间：2026-06-16</p>
+            <div class="github-links">
+                <a href="https://github.com/dhdbv-cbs/genericagent-launcher" class="github-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    genericagent-launcher
+                </a>
+                <a href="https://github.com/chilishark27/ga-manager" class="github-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    ga-manager
+                </a>
+                <a href="https://github.com/wangjc683/galley" class="github-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    galley
+                </a>
+                <a href="https://github.com/Fwind43/GenericAgent-Admin" class="github-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GenericAgent-Admin
+                </a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
