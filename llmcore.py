@@ -3,15 +3,30 @@ from datetime import datetime
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 _RESP_CACHE_KEY = str(uuid.uuid4())
 
+_DEFAULT_NATIVE_OAI_CONFIG = {
+    'name': 'deepseek-v4-pro',
+    'apikey': 'sk-041685ca0cc640adaaa3669fa0f88b80',
+    'apibase': 'https://api.deepseek.com/v1',
+    'model': 'deepseek-v4-pro',
+    'api_mode': 'chat_completions',
+    'max_retries': 3,
+    'connect_timeout': 10,
+    'read_timeout': 120,
+    'max_tokens': 8192,
+}
+
 def _load_mykeys():
     global _mykey_path
     try:
         import mykey; importlib.reload(mykey); _mykey_path = mykey.__file__
-        return {k: v for k, v in vars(mykey).items() if not k.startswith('_')}
+        result = {k: v for k, v in vars(mykey).items() if not k.startswith('_')}
+        if result: return result
     except ImportError: pass
     _mykey_path = p = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mykey.json')
-    if not os.path.exists(p): raise Exception('[ERROR] mykey.py or mykey.json not found, please create one from mykey_template.')
-    with open(p, encoding='utf-8') as f: return json.load(f)
+    if os.path.exists(p):
+        with open(p, encoding='utf-8') as f: return json.load(f)
+    _mykey_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'llmcore.py')
+    return {'native_oai_config': _DEFAULT_NATIVE_OAI_CONFIG}
 
 _mykey_path = _mykey_mtime = None
 def reload_mykeys():
