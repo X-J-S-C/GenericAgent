@@ -1,40 +1,171 @@
 {
   "version": "0.4.0",
   "created_at": "2026-06-15",
-  "updated_at": "2026-06-15",
+  "updated_at": "2026-06-16",
   "milestones": {
-    "M1": {"name": "基础 API 打通", "priority": "high", "status": "completed", "completed_at": "2026-06-15"},
-    "M2": {"name": "多 Agent UI", "priority": "high", "status": "pending"},
-    "M3": {"name": "设置与高级", "priority": "medium", "status": "pending"}
+    "M1": {
+      "name": "基础 API 打通",
+      "priority": "high",
+      "status": "completed",
+      "completed_at": "2026-06-16",
+      "verify": "HTTP 200 + WebSocket 通 + DeepSeek API 可调用"
+    },
+    "M2": {
+      "name": "多 Agent UI",
+      "priority": "high",
+      "status": "pending"
+    },
+    "M3": {
+      "name": "设置与高级",
+      "priority": "medium",
+      "status": "pending"
+    }
   },
   "tasks": {
-    "02": {"name": "后端 FastAPI 基础（HTTP + WS）", "milestone": "M1", "status": "done", "file": "api_server.py"},
-    "03": {"name": "核心 Agent 接口（发送/停止/状态）", "milestone": "M1", "status": "done"},
-    "04": {"name": "会话管理 API（列表/恢复/删除）", "milestone": "M2", "status": "pending"},
-    "05": {"name": "LLM 模型切换 API", "milestone": "M1", "status": "done"},
-    "06": {"name": "设置/配置读写 API", "milestone": "M3", "status": "pending"},
-    "07": {"name": "文件 API（浏览/读/写/上传）", "milestone": "M3", "status": "pending"},
-    "08": {"name": "proto_ui 数据驱动化", "milestone": "M1", "status": "done", "file": "proto_ui/app.js"},
-    "09": {"name": "统一 JSON 数据格式", "milestone": "M1", "status": "done", "file": "assets/api_schema.json"},
-    "10": {"name": "前端 mock → 真实 API", "milestone": "M1", "status": "done"},
-    "11": {"name": "聊天视图动态渲染", "milestone": "M1", "status": "done"},
-    "12": {"name": "输入框增强（文件拖拽 + 代码高亮）", "milestone": "M2", "status": "pending"},
-    "13": {"name": "指挥家视图", "milestone": "M2", "status": "pending"},
-    "14": {"name": "蜂巢视图", "milestone": "M2", "status": "pending"},
-    "15": {"name": "变形者视图", "milestone": "M2", "status": "pending"},
-    "16": {"name": "设置面板功能化", "milestone": "M3", "status": "pending"},
-    "17": {"name": "记忆管理视图", "milestone": "M3", "status": "pending"},
-    "18": {"name": "桌面宠物组件", "milestone": "M3", "status": "pending"},
-    "19": {"name": "WebSocket 连接状态 UI", "milestone": "M1", "status": "done"},
-    "20": {"name": "错误处理与空状态", "milestone": "M3", "status": "pending"},
-    "21": {"name": "前端工程化脚本", "milestone": "M2", "status": "pending"},
-    "22": {"name": "前端 Store（状态管理）", "milestone": "M2", "status": "pending"},
-    "23": {"name": "统一 Python 启动脚本", "milestone": "M1", "status": "done", "file": "start.py"},
-    "24": {"name": "README & 启动说明", "milestone": "M3", "status": "pending"},
-    "25": {"name": "端到端测试", "milestone": "M1", "status": "done", "file": "test_m1_acceptance.py"}
+    "02": {
+      "name": "后端 FastAPI 基础（HTTP + WS）",
+      "milestone": "M1",
+      "status": "done",
+      "file": "api_server.py"
+    },
+    "03": {
+      "name": "核心 Agent 接口（发送/停止/状态）",
+      "milestone": "M1",
+      "status": "done"
+    },
+    "05": {
+      "name": "LLM 模型切换 API",
+      "milestone": "M1",
+      "status": "done"
+    },
+    "08": {
+      "name": "proto_ui 数据驱动化",
+      "milestone": "M1",
+      "status": "done",
+      "file": "proto_ui/app.js"
+    },
+    "09": {
+      "name": "统一 JSON 数据格式",
+      "milestone": "M1",
+      "status": "done",
+      "file": "assets/api_schema.json"
+    },
+    "10": {
+      "name": "前端 mock → 真实 API",
+      "milestone": "M1",
+      "status": "done"
+    },
+    "11": {
+      "name": "聊天视图动态渲染",
+      "milestone": "M1",
+      "status": "done"
+    },
+    "19": {
+      "name": "WebSocket 连接状态 UI",
+      "milestone": "M1",
+      "status": "done"
+    },
+    "23": {
+      "name": "统一 Python 启动脚本",
+      "milestone": "M1",
+      "status": "done",
+      "file": "start.py"
+    },
+    "25": {
+      "name": "端到端测试",
+      "milestone": "M1",
+      "status": "done",
+      "file": "test_m1_acceptance.py"
+    },
+    "26": {
+      "name": "配置文件（DeepSeek v4-pro）",
+      "milestone": "M1",
+      "status": "done",
+      "file": "mykey.py",
+      "note": "native_oai_config 指向 https://api.deepseek.com/v1，模型 deepseek-v4-pro"
+    },
+    "04": {
+      "name": "会话管理 API（列表/恢复/删除）",
+      "milestone": "M2",
+      "status": "pending"
+    },
+    "06": {
+      "name": "设置/配置读写 API",
+      "milestone": "M3",
+      "status": "pending"
+    },
+    "07": {
+      "name": "文件 API（浏览/读/写/上传）",
+      "milestone": "M3",
+      "status": "pending"
+    },
+    "12": {
+      "name": "输入框增强（文件拖拽 + 代码高亮）",
+      "milestone": "M2",
+      "status": "pending"
+    },
+    "13": {
+      "name": "指挥家视图",
+      "milestone": "M2",
+      "status": "pending"
+    },
+    "14": {
+      "name": "蜂巢视图",
+      "milestone": "M2",
+      "status": "pending"
+    },
+    "15": {
+      "name": "变形者视图",
+      "milestone": "M2",
+      "status": "pending"
+    },
+    "16": {
+      "name": "设置面板功能化",
+      "milestone": "M3",
+      "status": "pending"
+    },
+    "17": {
+      "name": "记忆管理视图",
+      "milestone": "M3",
+      "status": "pending"
+    },
+    "18": {
+      "name": "桌面宠物组件",
+      "milestone": "M3",
+      "status": "pending"
+    },
+    "20": {
+      "name": "错误处理与空状态",
+      "milestone": "M3",
+      "status": "pending"
+    },
+    "21": {
+      "name": "前端工程化脚本",
+      "milestone": "M2",
+      "status": "pending"
+    },
+    "22": {
+      "name": "前端 Store（状态管理）",
+      "milestone": "M2",
+      "status": "pending"
+    },
+    "24": {
+      "name": "README & 启动说明",
+      "milestone": "M3",
+      "status": "pending"
+    }
+  },
+  "current_llm": {
+    "name": "NativeOAISession/deepseek-v4-pro",
+    "model": "deepseek-v4-pro",
+    "apibase": "https://api.deepseek.com/v1",
+    "provider": "DeepSeek"
   },
   "api_routes": {
     "GET /": "服务健康检查",
+    "GET /ui/": "前端 Web UI",
+    "GET /ui/styles.css": "前端样式（陶土色设计系统）",
+    "GET /ui/app.js": "前端逻辑（API 集成 + 状态管理）",
     "GET /api/status": "Agent 状态（is_running, llm_no, llm_name, current_task_id）",
     "GET /api/llms": "列出所有可用 LLM",
     "POST /api/llm/switch": "切换 LLM（body: {index: int}）",
@@ -58,21 +189,37 @@
       "pong": "心跳响应"
     }
   },
+  "runtime_verification": {
+    "service_running": true,
+    "process_pid": 7212,
+    "port": 8000,
+    "access_url": "http://localhost:8000/ui/",
+    "last_verified_at": "2026-06-16"
+  },
   "dependencies": {
+    "python": ">=3.10",
     "fastapi": ">=0.115",
-    "uvicorn": ">=0.30"
+    "uvicorn": ">=0.30",
+    "requests": ">=2.31"
   },
   "start_commands": {
-    "api_only": "uvicorn api_server:app --host 0.0.0.0 --port 18792 --reload",
+    "api_only": "uvicorn api_server:app --host 0.0.0.0 --port 8000 --reload",
     "unified": "python start.py",
     "unified_with_bots": "python start.py --tg --feishu --pet"
   },
+  "configuration_files": {
+    "mykey.py": "LLM 凭证配置（native_oai_config）",
+    "mykey_template.py": "配置模板（含所有 Session 类型说明）"
+  },
   "files": {
     "api_server.py": "FastAPI 后端主文件（任务 02, 03, 05 完成）",
-    "assets/api_schema.json": "JSON 数据格式定义（任务 09 完成）",
     "proto_ui/index.html": "Web UI 主页面（任务 08 完成）",
     "proto_ui/styles.css": "温暖陶土色设计系统（任务 08 完成）",
     "proto_ui/app.js": "前端状态管理 + API 集成（任务 08, 10 完成）",
-    "start.py": "统一 Python 启动脚本（任务 23 完成）"
+    "start.py": "统一 Python 启动脚本（任务 23 完成）",
+    "mykey.py": "DeepSeek v4-pro 配置（任务 26 完成）",
+    "llmcore.py": "LLM Session 核心（NativeOAISession 等）",
+    "agentmain.py": "GeneraticAgent 主循环",
+    "test_m1_acceptance.py": "M1 端到端验收测试（任务 25 完成）"
   }
 }
