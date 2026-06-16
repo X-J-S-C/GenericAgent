@@ -215,24 +215,134 @@
       <section id="view-memory" class="view">
         <div class="view-header">
           <h2 class="view-title">记忆管理</h2>
-          <button id="btn-add-memory" class="btn btn-primary btn-sm">添加记忆</button>
+          <div class="header-actions">
+            <button id="btn-refresh-memory" class="btn btn-ghost btn-sm">刷新</button>
+            <button id="btn-add-memory" class="btn btn-primary btn-sm">新增记忆项</button>
+          </div>
         </div>
-        <div id="memory-layers" class="memory-layers">
-          <div class="memory-layer" data-layer="L0">
-            <div class="layer-header"><span class="layer-badge">L0</span><h4>原始会话</h4></div>
-            <div class="layer-content" id="mem-L0"><p class="empty-sub">无数据</p></div>
+
+        <!-- 记忆 Tabs -->
+        <div class="memory-tabs" id="memory-tabs">
+          <button class="memory-tab active" data-mtab="L1">L1 · 工作记忆</button>
+          <button class="memory-tab" data-mtab="L2">L2 · 全局记忆</button>
+          <button class="memory-tab" data-mtab="insights">洞察</button>
+          <button class="memory-tab" data-mtab="L3">L3 · 技能库</button>
+          <button class="memory-tab" data-mtab="sessions">会话</button>
+        </div>
+
+        <!-- L1 工作记忆 -->
+        <div class="memory-panel active" data-mpanel="L1">
+          <div class="panel-toolbar">
+            <span class="panel-meta">当前任务中的 key_info（工作记忆）</span>
+            <button id="btn-edit-L1" class="btn btn-ghost btn-sm">编辑</button>
           </div>
-          <div class="memory-layer" data-layer="L1">
-            <div class="layer-header"><span class="layer-badge">L1</span><h4>工作记忆</h4></div>
-            <div class="layer-content" id="mem-L1"><p class="empty-sub">无数据</p></div>
+          <div class="memory-textarea-wrap">
+            <textarea id="mem-L1" class="memory-textarea" placeholder="暂无工作记忆。下次任务将写入 key_info。"></textarea>
           </div>
-          <div class="memory-layer" data-layer="L2">
-            <div class="layer-header"><span class="layer-badge">L2</span><h4>全局记忆</h4></div>
-            <div class="layer-content" id="mem-L2"><p class="empty-sub">无数据</p></div>
+          <div class="panel-footer">
+            <span id="L1-status" class="panel-status"></span>
+            <button id="btn-save-L1" class="btn btn-primary btn-sm" disabled>保存（仅本地暂存，写入 temp/L1_working/）</button>
           </div>
-          <div class="memory-layer" data-layer="L3">
-            <div class="layer-header"><span class="layer-badge">L3</span><h4>技能库</h4></div>
-            <div class="layer-content" id="mem-L3"><p class="empty-sub">无数据</p></div>
+        </div>
+
+        <!-- L2 全局记忆（可编辑保存到 global_mem.txt） -->
+        <div class="memory-panel" data-mpanel="L2">
+          <div class="panel-toolbar">
+            <span class="panel-meta">memory/global_mem.txt（每次任务启动时都会拼接到 system prompt）</span>
+            <button id="btn-edit-L2" class="btn btn-ghost btn-sm">编辑</button>
+          </div>
+          <div class="memory-textarea-wrap">
+            <textarea id="mem-L2" class="memory-textarea" placeholder="loading..."></textarea>
+          </div>
+          <div class="panel-footer">
+            <span id="L2-status" class="panel-status"></span>
+            <button id="btn-save-L2" class="btn btn-primary btn-sm">保存到 global_mem.txt</button>
+          </div>
+        </div>
+
+        <!-- 洞察（追加到 global_mem_insight.txt） -->
+        <div class="memory-panel" data-mpanel="insights">
+          <div class="panel-toolbar">
+            <span class="panel-meta">memory/global_mem_insight.txt（追加模式）</span>
+          </div>
+          <div class="insight-input">
+            <input type="text" id="insight-title" class="insight-title-input" placeholder="洞察标题（可选）" />
+            <textarea id="insight-content" class="memory-textarea" rows="6" placeholder="写下本次任务的洞察/反思/知识..."></textarea>
+            <div class="panel-footer">
+              <span id="insight-status" class="panel-status"></span>
+              <button id="btn-add-insight" class="btn btn-primary btn-sm">追加为新洞察</button>
+            </div>
+          </div>
+          <div class="panel-toolbar" style="margin-top:16px;">
+            <span class="panel-meta">当前内容：</span>
+          </div>
+          <div class="memory-textarea-wrap">
+            <textarea id="mem-insights" class="memory-textarea memory-readonly" readonly></textarea>
+          </div>
+        </div>
+
+        <!-- L3 技能库（文件列表） -->
+        <div class="memory-panel" data-mpanel="L3">
+          <div class="panel-toolbar">
+            <span class="panel-meta" id="skills-meta">加载中...</span>
+            <button id="btn-add-skill" class="btn btn-ghost btn-sm">+ 新增 SOP</button>
+          </div>
+          <div id="mem-L3" class="skill-list"></div>
+        </div>
+
+        <!-- 会话列表（L0） -->
+        <div class="memory-panel" data-mpanel="sessions">
+          <div class="panel-toolbar">
+            <span class="panel-meta" id="sessions-meta">加载中...</span>
+            <button id="btn-refresh-sessions" class="btn btn-ghost btn-sm">刷新</button>
+          </div>
+          <div id="mem-L0" class="session-list"></div>
+        </div>
+
+        <!-- 新增记忆项弹窗 -->
+        <div id="add-memory-modal" class="modal hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>新增记忆项</h3>
+              <button class="icon-btn modal-close" data-close="add-memory-modal">×</button>
+            </div>
+            <div class="modal-body">
+              <label class="form-label">层级 (layer)</label>
+              <select id="add-mem-layer" class="form-select">
+                <option value="L1">L1 · 工作记忆</option>
+                <option value="L2">L2 · 全局记忆（追加到 global_mem.txt）</option>
+                <option value="L3">L3 · 技能库（新建 .md 文件）</option>
+                <option value="L0">L0 · 原始会话</option>
+              </select>
+              <label class="form-label">标题</label>
+              <input type="text" id="add-mem-title" class="form-input" placeholder="例如：如何处理 PDF 文件" />
+              <label class="form-label">内容</label>
+              <textarea id="add-mem-content" class="memory-textarea" rows="8" placeholder="写下具体的操作步骤/知识/代码片段..."></textarea>
+            </div>
+            <div class="modal-footer">
+              <span id="add-mem-status" class="panel-status"></span>
+              <button id="btn-submit-mem" class="btn btn-primary btn-sm">确认添加</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 新增 SOP 弹窗 -->
+        <div id="add-skill-modal" class="modal hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>新增 SOP 技能</h3>
+              <button class="icon-btn modal-close" data-close="add-skill-modal">×</button>
+            </div>
+            <div class="modal-body">
+              <label class="form-label">标题 (将作为文件名)</label>
+              <input type="text" id="skill-title" class="form-input" placeholder="例如：操作 MySQL 数据库" />
+              <label class="form-label">内容 (Markdown)</label>
+              <textarea id="skill-content" class="memory-textarea" rows="10" placeholder="# 操作 MySQL 数据库\n\n1. ...\n2. ..."></textarea>
+            </div>
+            <div class="modal-footer">
+              <span id="skill-status" class="panel-status"></span>
+              <button id="btn-submit-skill" class="btn btn-primary btn-sm">确认添加到 L3</button>
+            </div>
           </div>
         </div>
       </section>
@@ -241,6 +351,10 @@
       <section id="view-settings" class="view">
         <div class="view-header">
           <h2 class="view-title">设置</h2>
+          <div class="header-actions">
+            <span id="settings-status" class="panel-status"></span>
+            <button id="btn-save-settings" class="btn btn-primary btn-sm">保存设置</button>
+          </div>
         </div>
         <div class="settings-container">
           <div class="settings-group">
@@ -254,14 +368,35 @@
           </div>
 
           <div class="settings-group">
-            <h3 class="settings-group-title">记忆配置</h3>
+            <h3 class="settings-group-title">记忆 & 运行参数</h3>
             <div class="setting-row">
-              <label class="setting-label">工作记忆大小</label>
+              <label class="setting-label">工作记忆大小 (work_mem_size)</label>
               <input type="number" id="setting-work-mem" class="setting-input" value="10" min="1" max="100" />
             </div>
             <div class="setting-row">
-              <label class="setting-label">最大回合数</label>
-              <input type="number" id="setting-max-turns" class="setting-input" value="70" min="1" max="200" />
+              <label class="setting-label">最大回合数 (max_turns)</label>
+              <input type="number" id="setting-max-turns" class="setting-input" value="70" min="1" max="500" />
+            </div>
+            <div class="setting-row">
+              <label class="setting-label">语言 (lang)</label>
+              <select id="setting-lang" class="setting-input">
+                <option value="zh">中文</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <label class="setting-label">详细日志 (verbose)</label>
+              <label class="toggle">
+                <input type="checkbox" id="setting-verbose" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="setting-row">
+              <label class="setting-label">增量输出 (inc_out)</label>
+              <label class="toggle">
+                <input type="checkbox" id="setting-inc-out" />
+                <span class="toggle-slider"></span>
+              </label>
             </div>
           </div>
 
@@ -278,7 +413,7 @@
 
           <div class="settings-group">
             <h3 class="settings-group-title">关于</h3>
-            <p class="settings-about">GenericAgent v0.2.0<br/>自进化自主智能体框架</p>
+            <p class="settings-about">GenericAgent v0.2.0<br/>自进化自主智能体框架<br/>设置文件: temp/settings.json</p>
           </div>
         </div>
       </section>

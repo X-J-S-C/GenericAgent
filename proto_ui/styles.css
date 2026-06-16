@@ -472,6 +472,7 @@ ul, ol { list-style: none; }
 .morph-drop-zone:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
 
 /* ── Memory View ─────────────────────────────────────────────── */
+/* 旧版 .memory-layers 保留但降级为次要样式 */
 .memory-layers {
   flex: 1; overflow-y: auto;
   padding: 20px 24px;
@@ -499,6 +500,203 @@ ul, ol { list-style: none; }
 }
 .layer-header h4 { font-size: 13px; font-weight: 600; }
 .layer-content { padding: 12px 14px; font-size: 12px; color: var(--text-secondary); max-height: 200px; overflow-y: auto; }
+
+/* 新版 Memory Tabs & Panels */
+.memory-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 12px 24px 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+.memory-tab {
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+.memory-tab:hover { color: var(--text-primary); background: var(--bg-elevated); }
+.memory-tab.active {
+  background: var(--bg-elevated);
+  border-color: var(--border);
+  color: var(--accent);
+  position: relative;
+}
+.memory-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+}
+
+.memory-panel {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+  flex-direction: column;
+  gap: 12px;
+}
+.memory-panel.active { display: flex; }
+
+.panel-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.panel-meta { font-size: 12px; color: var(--text-secondary); }
+.panel-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+.panel-status { font-size: 12px; color: var(--success); }
+
+.memory-textarea-wrap {
+  flex: 1;
+  min-height: 200px;
+  display: flex;
+}
+.memory-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 12px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: "SF Mono", "Fira Code", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.memory-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.memory-textarea.memory-readonly {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+.insight-input {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.insight-title-input {
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+}
+.insight-title-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* Skill & Session Lists */
+.skill-list, .session-list {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.skill-item, .session-item {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+.skill-item:hover, .session-item:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+.skill-item-title, .session-item-title {
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+}
+.skill-item-meta, .session-item-meta {
+  font-size: 11px; color: var(--text-muted);
+}
+.skill-item-actions {
+  display: flex; gap: 6px; align-self: flex-end;
+}
+
+/* Modal (Add Memory / Add Skill) */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+.modal.hidden { display: none; }
+.modal-content {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  width: min(600px, 90vw);
+  max-height: 85vh;
+  display: flex; flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: slideDown 0.2s ease;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.modal-close { font-size: 20px; color: var(--text-secondary); background: transparent; }
+.modal-close:hover { color: var(--text-primary); }
+.modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.form-label {
+  font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.form-input {
+  padding: 8px 12px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+}
+.form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.form-select {
+  padding: 8px 12px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+}
+.form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.modal-footer {
+  padding: 12px 20px;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px;
+}
 
 /* ── Settings View ───────────────────────────────────────────── */
 .settings-container {

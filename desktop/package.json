@@ -1,0 +1,64 @@
+{
+  "name": "genericagent-desktop",
+  "version": "0.2.0",
+  "description": "GenericAgent 桌面端（Electron 外壳 + Python FastAPI 后端）",
+  "main": "main.js",
+  "author": "GenericAgent",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "start:debug": "electron --inspect=9229 .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {},
+  "build": {
+    "appId": "com.genericagent.app",
+    "productName": "GenericAgent",
+    "asar": true,
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "../api_server.py",
+      "../agentmain.py",
+      "../llmcore.py",
+      "../ga.py",
+      "../agent_loop.py",
+      "../mykey*.py",
+      "../proto_ui/**",
+      "../memory/**",
+      "../assets/**",
+      "../start.py",
+      "../.gitignore",
+      "!**/node_modules/**",
+      "!**/dist/**",
+      "!**/.git/**"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.productivity",
+      "icon": "icon.png"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility",
+      "icon": "icon.png"
+    }
+  }
+}
